@@ -248,25 +248,37 @@ body::before{
   50%{ transform: translateY(-5px); }
 }
 
-.photo-frame{
-  width: 220px;
-  height: 280px;
-  border: 2px dashed rgba(255, 255, 255, .45);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
+/* About Me 右侧两张照片，取代原本的 "YOUR PHOTO HERE" 占位框 */
+.about-photos{
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(3deg);
+  gap: 18px;
+  flex: 0 0 auto;
 }
 
-.photo-frame span{
-  font-family: var(--font-mono);
-  font-size: .82rem;
-  letter-spacing: 2px;
-  color: rgba(255, 255, 255, .72);
-  text-align: center;
-  padding: 0 12px;
+.about-photo{
+  position: relative;
+  width: 190px;
+  height: 260px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .18);
+  transition: transform .4s ease, box-shadow .4s ease;
+}
+
+.about-photo:nth-child(1){ transform: rotate(-3deg); }
+.about-photo:nth-child(2){ transform: rotate(3deg); margin-top: 26px; }
+
+.about-photo img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.about-photo:hover{
+  transform: scale(2);
+  z-index: 20;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
 }
 
 /* 向下滚动提示 */
@@ -517,7 +529,7 @@ body::before{
   opacity: 0;
   overflow: hidden;
   margin-top: 0;
-  transition: max-height .6s ease, opacity .5s ease, margin-top .6s ease;
+  transition: max-height .6s ease, opacity .5s ease, margin-top .6s ease, overflow 0s .6s;
 }
 
 .exp-card:hover .exp-photos-wrap,
@@ -525,6 +537,10 @@ body::before{
   max-height: 300px;
   opacity: 1;
   margin-top: 18px;
+  /* 展开之后才把 overflow 打开，放大照片才有地方可以「长出去」而不被裁掉；
+     收合动画期间仍然维持 hidden，不然收合时会先看到照片没被裁切的样子 */
+  overflow: visible;
+  transition: max-height .6s ease, opacity .5s ease, margin-top .6s ease;
 }
 
 .exp-photos{
@@ -533,6 +549,7 @@ body::before{
 }
 
 .exp-photo{
+  position: relative;
   flex: 1;
   aspect-ratio: 1;
   display: flex;
@@ -543,7 +560,7 @@ body::before{
   overflow: hidden;
   opacity: 0;
   transform: translateY(8px);
-  transition: opacity .4s ease, transform .4s ease;
+  transition: opacity .4s ease, transform .35s ease, box-shadow .35s ease;
 }
 
 .exp-card:hover .exp-photo,
@@ -574,6 +591,14 @@ body::before{
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* 滑过单张照片时放大到两倍，离开时用同一段 transition 缓缓缩回去，
+   而不是瞬间变大瞬间变小；z-index 拉高才不会被旁边的照片盖住 */
+.exp-photo.has-img:hover{
+  transform: scale(2);
+  z-index: 20;
+  box-shadow: 0 16px 46px rgba(0, 0, 0, .55);
 }
 
 
@@ -670,7 +695,7 @@ body::before{
   .section-title{ font-size: 2.2rem; }
 
   .about-layout{ justify-content: center; text-align: center; }
-  .photo-frame{ margin: 0 auto; }
+  .about-photos{ margin: 0 auto; }
 
   #experience .exp-grid,
   #projects .exp-grid{
