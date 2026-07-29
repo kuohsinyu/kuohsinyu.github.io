@@ -248,21 +248,27 @@ body::before{
   50%{ transform: translateY(-5px); }
 }
 
-/* About Me 右侧两张照片，取代原本的 "YOUR PHOTO HERE" 占位框。
-   固定尺寸、不换行，就是简单的一左一右两张小照片（面积大约缩小到原本的十分之一）*/
+/* About Me 右侧两张照片，取代原本的 "YOUR PHOTO HERE" 占位框，固定尺寸、
+   一左一右两张照片。放大之后（180x246 x2 张 + 间距）已经放不进 .about-layout
+   原本的 flex 排版（section 本身宽度上限只有 1140px，扣掉左右 padding 剩下
+   约 780px，装不下文字栏 + 两张放大后的照片），会被 flex-wrap 挤到下一行、
+   也对不齐 nav。改成绝对定位、直接贴齐 section 自己的右边界——section 的
+   右边界（max-width: 1140px）本来就跟 nav 上「PROJECT & PROGRAM」的位置很接近，
+   脱离 flex 排版的宽度限制反而更容易对齐，且不受浏览器宽度换算精细度影响 */
 .about-photos{
+  position: absolute;
+  top: 210px;
+  right: 0;
   display: flex;
   flex-wrap: nowrap;
-  flex-shrink: 0;
-  gap: 12px;
-  width: 152px;
+  gap: 36px;
 }
 
 .about-photo{
   position: relative;
   flex: 0 0 auto;
-  width: 60px;
-  height: 82px;
+  width: 180px;
+  height: 246px;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .18);
@@ -270,7 +276,11 @@ body::before{
 }
 
 .about-photo:nth-child(1){ transform: rotate(-3deg); }
-.about-photo:nth-child(2){ transform: rotate(3deg); margin-top: 8px; }
+.about-photo:nth-child(2){ transform: rotate(3deg); margin-top: 24px; }
+
+/* 照片改成绝对定位、贴齐 section 右边界之后，段落文字原本 640px 的宽度会一路
+   延伸到照片底下、被盖住一截。这里单独把 About 的文字栏收窄，留出照片的位置 */
+#about .section-text{ max-width: 500px; }
 
 .about-photo img{
   width: 100%;
