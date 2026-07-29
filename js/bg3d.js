@@ -298,47 +298,13 @@ function init() {
     );
   }
 
-  /* ---------------- 程序绘制的地球贴图：海洋 + 七大洲的简化色块 ---------------- */
+  /* ---------------- 地球贴图：真实世界地图（NASA Blue Marble 等距柱状投影），
+     经纬度换算跟 latLongToVector3 用的是同一套标准公式，本初子午线对齐贴图水平中线，
+     所以下面 buildGlobeMarkers 的经纬度可以直接对上贴图里真正的国家位置 ---------------- */
+  const earthTextureLoader = new THREE.TextureLoader();
   function buildEarthTexture() {
-    const w = 1024;
-    const h = 512;
-    const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext('2d');
-
-    const ocean = ctx.createLinearGradient(0, 0, 0, h);
-    ocean.addColorStop(0, '#0b2a3f');
-    ocean.addColorStop(0.5, '#123f57');
-    ocean.addColorStop(1, '#0b2a3f');
-    ctx.fillStyle = ocean;
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.fillStyle = '#3f7a54';
-    function blob(cx, cy, rx, ry, points, seed) {
-      ctx.beginPath();
-      for (let i = 0; i <= points; i++) {
-        const a = (i / points) * Math.PI * 2;
-        const jitter = 0.72 + hash(Math.cos(a) * 9 + seed, Math.sin(a) * 9 + seed) * 0.5;
-        const x = cx + Math.cos(a) * rx * jitter;
-        const y = cy + Math.sin(a) * ry * jitter;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    blob(190, 130, 150, 85, 24, 1); // 北美洲
-    blob(345, 320, 65, 95, 20, 2); // 南美洲
-    blob(555, 105, 65, 55, 18, 3); // 欧洲
-    blob(560, 255, 95, 105, 22, 4); // 非洲
-    blob(760, 150, 165, 110, 26, 5); // 亚洲
-    blob(890, 330, 55, 45, 16, 6); // 澳洲
-    ctx.fillRect(0, 462, w, 50); // 南极洲（简化成一条冰帽）
-
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.needsUpdate = true;
+    const texture = earthTextureLoader.load('assets/img/world-map.jpg');
+    texture.colorSpace = THREE.SRGBColorSpace;
     return texture;
   }
 
@@ -486,8 +452,8 @@ function init() {
   const terrain = buildTerrain();
   // 两条河流的可见范围都刻意留在镜头看向的那一小片区域（跟原本验证过、不会盖到
   // 左侧标题文字的范围一致），地图放大后的其余区域就单纯是山，没有河流也没关系
-  const river1 = buildRiver(riverCenterZ1, -35, 35);
-  const river2 = buildRiver(riverCenterZ2, -20, 45);
+  const river1 = buildRiver(riverCenterZ1, -75, 75);
+  const river2 = buildRiver(riverCenterZ2, -65, 90);
   const particles = buildParticles(CONFIG.particleCount);
   landscape.add(terrain, river1, river2, particles);
 
@@ -495,10 +461,11 @@ function init() {
   city.position.x = CONFIG.groupOffsetX;
   scene.add(city);
 
-  // 地球放在跟摄影机目标点差不多的位置、稍微垫高，不管镜头怎么自动漂移都还是
-  // 大致置中，不需要为了这个背景另外调一套摄影机参数
+  // 地球放在跟摄影机目标点差不多的位置，不管镜头怎么自动漂移都还是大致置中，
+  // 不需要为了这个背景另外调一套摄影机参数。半径加倍之后原本 +14 的垫高量
+  // 相对小了很多，会把地球顶到画面上緣，改成只垫高一点点让它更靠近画面中央
   const globe = buildGlobe();
-  globe.position.set(CONFIG.cameraTarget[0], CONFIG.cameraTarget[1] + 14, CONFIG.cameraTarget[2]);
+  globe.position.set(CONFIG.cameraTarget[0], CONFIG.cameraTarget[1] + 4, CONFIG.cameraTarget[2]);
   scene.add(globe);
   const Y_AXIS = new THREE.Vector3(0, 1, 0);
 

@@ -20,7 +20,10 @@
 html{
   margin: 0;
   scroll-behavior: smooth;
-  background: linear-gradient(160deg, var(--bg) 0%, var(--bg-deep) 100%);
+  /* 原本是整页对角渐层，但渐层是按「全文件高度」算的，跟 #experience 自己
+     渐层收尾的 --bg-deep 在特定捲动位置对不上颜色，交界处会切出一条明显的线。
+     整页固定用同一个纯色，才能保证跟任何区块渐层的收尾颜色都精准衔接。 */
+  background: var(--bg-deep);
 }
 
 body{
