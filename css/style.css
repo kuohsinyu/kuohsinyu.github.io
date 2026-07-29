@@ -127,9 +127,10 @@ body::before{
   gap: 40px;
 }
 
+/* 字體加大、顏色提亮 —— 導覽列文字原本 .8rem / 55% 白，太小太淡 */
 .nav-links a{
-  color: rgba(255, 255, 255, 0.55);
-  font-size: .8rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
   font-weight: 500;
   letter-spacing: 1.5px;
   transition: color .4s ease, text-shadow .4s ease, opacity .4s ease;
@@ -146,10 +147,10 @@ body::before{
 
 .lang-toggle{
   font-family: var(--font-mono);
-  font-size: .74rem;
+  font-size: .9rem;
   font-weight: 500;
   letter-spacing: 1px;
-  color: rgba(255, 255, 255, .8);
+  color: rgba(255, 255, 255, .95);
   background: transparent;
   border: 1px solid rgba(255, 255, 255, .35);
   border-radius: 999px;
@@ -261,9 +262,9 @@ body::before{
 
 .photo-frame span{
   font-family: var(--font-mono);
-  font-size: .68rem;
+  font-size: .82rem;
   letter-spacing: 2px;
-  color: rgba(255, 255, 255, .5);
+  color: rgba(255, 255, 255, .72);
   text-align: center;
   padding: 0 12px;
 }
@@ -276,9 +277,9 @@ body::before{
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: .72rem;
+  font-size: .88rem;
   letter-spacing: 3px;
-  color: rgba(255, 255, 255, .5);
+  color: rgba(255, 255, 255, .72);
   transition: color .3s ease;
 }
 
@@ -314,9 +315,9 @@ body::before{
 
 .section-tag{
   font-family: var(--font-mono);
-  font-size: .78rem;
+  font-size: .95rem;
   letter-spacing: 3px;
-  color: rgba(255, 255, 255, .5);
+  color: rgba(255, 255, 255, .75);
   margin-bottom: 18px;
 }
 
@@ -355,8 +356,8 @@ body::before{
 
 .section-hint{
   font-family: var(--font-mono);
-  font-size: .8rem;
-  color: rgba(255, 255, 255, .45);
+  font-size: .95rem;
+  color: rgba(255, 255, 255, .68);
   margin: 0 0 34px;
 }
 
@@ -425,9 +426,9 @@ body::before{
 .exp-card-org{
   display: block;
   font-family: var(--font-mono);
-  font-size: .78rem;
+  font-size: .92rem;
   letter-spacing: .3px;
-  color: rgba(255, 255, 255, .55);
+  color: rgba(255, 255, 255, .8);
   margin-bottom: 6px;
   transition: color .3s ease;
 }
@@ -435,9 +436,9 @@ body::before{
 .exp-card-date{
   display: block;
   font-family: var(--font-mono);
-  font-size: .72rem;
+  font-size: .85rem;
   letter-spacing: 1px;
-  color: rgba(255, 255, 255, .4);
+  color: rgba(255, 255, 255, .62);
   transition: color .3s ease;
 }
 
@@ -448,9 +449,9 @@ body::before{
 
 .exp-card-text p{
   font-family: var(--font-mono);
-  font-size: .82rem;
+  font-size: .95rem;
   line-height: 1.75;
-  color: rgba(255, 255, 255, .65);
+  color: rgba(255, 255, 255, .85);
   margin: 0 0 14px;
   transition: color .3s ease;
 }
@@ -472,13 +473,15 @@ body::before{
   gap: 12px;
 }
 
+/* 修正：原本是 .1rem，字小到幾乎看不見，這裡是打字打錯，改回跟內文段落
+   同一個量級（.92rem），並把顏色一起提亮 */
 .exp-card-text li{
   position: relative;
   padding-left: 18px;
   font-family: var(--font-mono);
-  font-size: .8rem;
+  font-size: .92rem;
   line-height: 1.7;
-  color: rgba(255, 255, 255, .7);
+  color: rgba(255, 255, 255, .85);
 }
 
 .exp-card-text li::before{
@@ -494,9 +497,9 @@ body::before{
   display: inline-block;
   margin-top: 16px;
   font-family: var(--font-mono);
-  font-size: .74rem;
+  font-size: 1rem;
   letter-spacing: .5px;
-  color: rgba(255, 255, 255, .5);
+  color: rgba(255, 255, 255, .75);
   border-bottom: 1px solid rgba(255, 255, 255, .3);
   transition: color .3s ease;
 }
@@ -550,9 +553,9 @@ body::before{
 
 .exp-photo span{
   font-family: var(--font-mono);
-  font-size: .58rem;
+  font-size: .7rem;
   letter-spacing: 1px;
-  color: rgba(255, 255, 255, .4);
+  color: rgba(255, 255, 255, .6);
 }
 
 .exp-photo.has-img{
@@ -588,8 +591,8 @@ body::before{
   display: block;
   font-family: var(--font-mono);
   font-weight: 500;
-  font-size: .9rem;
-  color: rgba(255, 255, 255, .55);
+  font-size: 1rem;
+  color: rgba(255, 255, 255, .8);
   margin-top: 14px;
 }
 
@@ -644,7 +647,7 @@ body::before{
     gap: 10px;
   }
 
-  .nav-links a{ font-size: .72rem; }
+  .nav-links a{ font-size: .85rem; }
 
   .hero{
     padding: 180px 24px 100px;
