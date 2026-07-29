@@ -1,7 +1,8 @@
 // ============================================================
 // 1) 中英文雙語切換
 // 2) Landing page 點矩陣互動
-// 3) Experience 全螢幕聚光燈卡片
+// （Experience / Project & Program 的卡片展開純靠 CSS :hover / :focus-within，
+//   不需要額外的 JS）
 // ============================================================
 
 const TRANSLATIONS = {
@@ -10,6 +11,7 @@ const TRANSLATIONS = {
     'nav-work': 'LANDING PAGE',
     'nav-about': 'ABOUT',
     'nav-experience': 'EXPERIENCE',
+    'nav-projects': 'PROJECT &amp; PROGRAM',
     'nav-contact': 'CONTACT',
 
     'hero-line1': "Hi, I'm",
@@ -32,6 +34,10 @@ const TRANSLATIONS = {
     'exp-tag': '02 — EXPERIENCE',
     'exp-title': 'Experience',
     'exp-hint': 'Hover (or tap) a card to see the details',
+
+    'proj-tag': '03 — PROJECT &amp; PROGRAM',
+    'proj-title': 'Project &amp; Program',
+    'proj-hint': 'Hover (or tap) a card to see the details',
 
     'fiabci-title': 'Media Liaison &amp; Liaison Interpreter',
     'fiabci-org': '76th FIABCI World Congress — Vienna, Austria',
@@ -68,7 +74,7 @@ const TRANSLATIONS = {
     'photo-2': 'PHOTO 2',
     'photo-3': 'PHOTO 3',
 
-    'contact-tag': '03 — CONTACT',
+    'contact-tag': '04 — CONTACT',
     'contact-title': "Let's Talk",
     'contact-text': 'Open to working student roles, collaborations, or just a good conversation about design and data.',
   },
@@ -77,6 +83,7 @@ const TRANSLATIONS = {
     'nav-work': '首頁',
     'nav-about': '關於我',
     'nav-experience': '經歷',
+    'nav-projects': '專案與計畫',
     'nav-contact': '聯絡',
 
     'hero-line1': '嗨，我是',
@@ -99,6 +106,10 @@ const TRANSLATIONS = {
     'exp-tag': '02 — 經歷',
     'exp-title': '經歷',
     'exp-hint': '滑過（或點擊）卡片查看詳情',
+
+    'proj-tag': '03 — 專案與計畫',
+    'proj-title': '專案與計畫',
+    'proj-hint': '滑過（或點擊）卡片查看詳情',
 
     'fiabci-title': '媒體聯絡與隨行口譯',
     'fiabci-org': '第76屆國際不動產聯盟世界大會 — 奧地利維也納',
@@ -135,7 +146,7 @@ const TRANSLATIONS = {
     'photo-2': '照片 2',
     'photo-3': '照片 3',
 
-    'contact-tag': '03 — 聯絡',
+    'contact-tag': '04 — 聯絡',
     'contact-title': '聊聊吧',
     'contact-text': '歡迎工讀生職缺、合作機會，或單純想聊聊設計與數據的想法。',
   },
@@ -221,83 +232,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   applyLanguage(currentLang);
-
-  /* ---------------- Experience 全萤幕聚光灯 ---------------- */
-  const expStage = document.getElementById('expStage');
-  const expSpotlight = document.getElementById('expSpotlight');
-  const nav = document.querySelector('.nav');
-
-  if (expStage && expSpotlight) {
-    const NAV_HEIGHT = 96;
-
-    // hover-intent：鼠标移动经过卡片前往别处时不该抢先打开它，只有「停下来」
-    // 停留满一段时间才算数——用 mousemove 持续重设计时器，路过时事件不会停，
-    // 只有真的停在某张卡片上才会让计时器归零并打开
-    const HOVER_INTENT_DELAY = 120;
-    let intentTimer = null;
-    let intentTarget = null;
-
-    function openExperience(id) {
-      expStage.classList.add('is-open');
-      expSpotlight.dataset.active = id;
-    }
-
-    function closeExperience() {
-      // 一定要把还没触发的 hover-intent 计时器也清掉，不然明明关闭了，
-      // 之前排队要打开的那个还是会在 120ms 后把它重新打开，变成关不掉
-      clearTimeout(intentTimer);
-      intentTarget = null;
-      expStage.classList.remove('is-open');
-      delete expSpotlight.dataset.active;
-    }
-
-    function scheduleOpen(el) {
-      intentTarget = el;
-      clearTimeout(intentTimer);
-      intentTimer = setTimeout(() => {
-        if (intentTarget === el) openExperience(el.dataset.exp);
-      }, HOVER_INTENT_DELAY);
-    }
-
-    const triggers = expStage.querySelectorAll('.exp-card-mini, .exp-tab');
-    triggers.forEach((el) => {
-      el.addEventListener('mousemove', () => scheduleOpen(el));
-      el.addEventListener('mouseleave', () => {
-        if (intentTarget === el) {
-          clearTimeout(intentTimer);
-          intentTarget = null;
-        }
-      });
-      el.addEventListener('focus', () => {
-        clearTimeout(intentTimer);
-        intentTarget = el;
-        openExperience(el.dataset.exp);
-      });
-    });
-
-    // 滑到顶部导航或整个视窗外面时，视为离开体验区域，重置回矩阵/卡片状态
-    document.addEventListener('mousemove', (e) => {
-      if (expStage.classList.contains('is-open') && e.clientY < NAV_HEIGHT) {
-        closeExperience();
-      }
-    });
-    document.addEventListener('mouseleave', closeExperience);
-    if (nav) nav.addEventListener('mouseenter', closeExperience);
-
-    // 聚光灯是 position:fixed，捲动页面时不会自动跟着离开视窗，鼠标又没动的话
-    // 就永远收不到关闭信号——卷动时一律直接关闭，避免遮罩卡在画面上关不掉
-    window.addEventListener('scroll', () => {
-      if (expStage.classList.contains('is-open')) closeExperience();
-    }, { passive: true });
-
-    // 按 Esc 也能直接关闭
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && expStage.classList.contains('is-open')) closeExperience();
-    });
-
-    // 键盘操作：焦点离开整个 stage 时重置
-    expStage.addEventListener('focusout', (e) => {
-      if (!expStage.contains(e.relatedTarget)) closeExperience();
-    });
-  }
 });
