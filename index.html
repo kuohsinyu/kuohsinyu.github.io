@@ -44,9 +44,15 @@
       </span>
     </h1>
 
-    <div class="visual-side">
-      <div class="photo-frame" aria-hidden="true">
-        <span>YOUR PHOTO HERE</span>
+    <div class="dot-stage" id="dotStage">
+      <div class="dot-matrix" id="dotMatrix" aria-hidden="true"></div>
+
+      <div class="dot-coaster" aria-hidden="true">
+        <svg class="coaster-track" viewBox="0 0 480 480" preserveAspectRatio="none">
+          <path d="M30,380 C110,380 110,160 190,160 C270,160 240,320 320,320 C400,320 370,60 450,60"
+                fill="none" stroke="rgba(255,255,255,.4)" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 16"/>
+        </svg>
+        <div class="coaster-cart"></div>
       </div>
     </div>
 
@@ -56,20 +62,27 @@
     </a>
   </section>
 
-  <section id="about" class="section">
+  <section id="about" class="section section-wide">
     <span class="section-tag">01 — ABOUT</span>
     <h2 class="section-title">About Me</h2>
-    <p class="section-text">
-      Hi, I'm <strong>Syndrea</strong> — a bilingual marketing student moving between Taiwan and Germany,
-      currently exploring the space where data, design, and storytelling meet. I like turning raw numbers
-      into visuals people actually want to look at, and turning ideas into content that travels smoothly
-      across platforms and languages.
-    </p>
-    <p class="section-text">
-      Outside of coursework, I've managed social media for a concert band, built a sentiment-analysis
-      pipeline out of curiosity, and picked up interpreting work along the way — always looking for the
-      next thing to learn.
-    </p>
+    <div class="about-layout">
+      <div class="about-copy">
+        <p class="section-text">
+          Hi, I'm <strong>Syndrea</strong> — a bilingual marketing student moving between Taiwan and Germany,
+          currently exploring the space where data, design, and storytelling meet. I like turning raw numbers
+          into visuals people actually want to look at, and turning ideas into content that travels smoothly
+          across platforms and languages.
+        </p>
+        <p class="section-text">
+          Outside of coursework, I've managed social media for a concert band, built a sentiment-analysis
+          pipeline out of curiosity, and picked up interpreting work along the way — always looking for the
+          next thing to learn.
+        </p>
+      </div>
+      <div class="photo-frame" aria-hidden="true">
+        <span>YOUR PHOTO HERE</span>
+      </div>
+    </div>
   </section>
 
   <section id="experience" class="section section-wide">
@@ -199,5 +212,6 @@
 
 </main>
 
+<script src="js/script.js" defer></script>
 </body>
 </html>
