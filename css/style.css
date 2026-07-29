@@ -370,7 +370,7 @@ body::before{
 
 /* 均分整个画面宽度：Experience 两栏、Project & Program 三栏 */
 #experience .exp-grid{ grid-template-columns: repeat(2, 1fr); }
-#projects .exp-grid{ grid-template-columns: repeat(3, 1fr); }
+#projects .exp-grid{ grid-template-columns: repeat(2, 1fr); }
 
 .exp-card{
   position: relative;
@@ -560,7 +560,14 @@ body::before{
 ============================================================ */
 #experience{
   position: relative;
-  background: var(--exp-bg);
+  /* 跟前后深色区块之间不要硬切，上下各留一段绿到白／白到绿的渐层 */
+  background: linear-gradient(
+    to bottom,
+    var(--bg-deep) 0,
+    var(--exp-bg) 240px,
+    var(--exp-bg) calc(100% - 240px),
+    var(--bg-deep) 100%
+  );
   color: var(--exp-ink);
 }
 

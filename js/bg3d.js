@@ -20,7 +20,7 @@ function init() {
     particleCount: 260,
     cityBuildingCount: 30,
     cityWindowCount: 260,
-    globeRadius: 11,
+    globeRadius: 22,
     globeRotationSpeed: 0.12,
     autoDriftSpeed: 0.035,
     dragSensitivity: 0.005,
@@ -31,7 +31,9 @@ function init() {
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2('#04120b', 0.009);
 
-  const camera = new THREE.PerspectiveCamera(CONFIG.fov, window.innerWidth / window.innerHeight, 0.1, 200);
+  // far 原本是 200，天空半球（半径 240，见 buildSky）从摄影机视角看最远会超过 300，
+  // 不拉远 far clip 平面天空整个会被裁掉、完全不会画出来
+  const camera = new THREE.PerspectiveCamera(CONFIG.fov, window.innerWidth / window.innerHeight, 0.1, 500);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -117,8 +119,11 @@ function init() {
       // 否则河流两侧的地形边坡会比河面高，从远处看会把河流整条挡住
       const dist1 = Math.abs(z - riverCenterZ1(x));
       const dist2 = Math.abs(z - riverCenterZ2(x));
-      const mask1 = THREE.MathUtils.smoothstep(dist1, 2.6, 9);
-      const mask2 = THREE.MathUtils.smoothstep(dist2, 2.6, 9);
+      // 山变高之后，原本的平坦带宽度（2.6~9）已经不够了：就算 mask 只剩很小一点点，
+      // 乘上现在高很多的山势也会超过河面的高度，从某些角度看会变成一排规律的
+      // 三角形缺口「咬」进河流的边缘。平坦带整个往外推、坡度也放缓，才留够余裕。
+      const mask1 = THREE.MathUtils.smoothstep(dist1, 5, 16);
+      const mask2 = THREE.MathUtils.smoothstep(dist2, 5, 16);
       const valleyMask = Math.min(mask1, mask2);
       const height = ridge * valleyMask;
       pos.setY(i, height);
@@ -282,16 +287,141 @@ function init() {
     return group;
   }
 
+  /* ---------------- 经纬度 → 球面座标（跟下面画大陆用的等距圆柱投影对齐） ---------------- */
+  function latLongToVector3(lat, lon, radius) {
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+    return new THREE.Vector3(
+      -radius * Math.sin(phi) * Math.cos(theta),
+      radius * Math.cos(phi),
+      radius * Math.sin(phi) * Math.sin(theta),
+    );
+  }
+
+  /* ---------------- 程序绘制的地球贴图：海洋 + 七大洲的简化色块 ---------------- */
+  function buildEarthTexture() {
+    const w = 1024;
+    const h = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+
+    const ocean = ctx.createLinearGradient(0, 0, 0, h);
+    ocean.addColorStop(0, '#0b2a3f');
+    ocean.addColorStop(0.5, '#123f57');
+    ocean.addColorStop(1, '#0b2a3f');
+    ctx.fillStyle = ocean;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = '#3f7a54';
+    function blob(cx, cy, rx, ry, points, seed) {
+      ctx.beginPath();
+      for (let i = 0; i <= points; i++) {
+        const a = (i / points) * Math.PI * 2;
+        const jitter = 0.72 + hash(Math.cos(a) * 9 + seed, Math.sin(a) * 9 + seed) * 0.5;
+        const x = cx + Math.cos(a) * rx * jitter;
+        const y = cy + Math.sin(a) * ry * jitter;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    blob(190, 130, 150, 85, 24, 1); // 北美洲
+    blob(345, 320, 65, 95, 20, 2); // 南美洲
+    blob(555, 105, 65, 55, 18, 3); // 欧洲
+    blob(560, 255, 95, 105, 22, 4); // 非洲
+    blob(760, 150, 165, 110, 26, 5); // 亚洲
+    blob(890, 330, 55, 45, 16, 6); // 澳洲
+    ctx.fillRect(0, 462, w, 50); // 南极洲（简化成一条冰帽）
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }
+
+  /* ---------------- 地图标注用的文字贴图（地名牌） ---------------- */
+  function makeLabelSprite(text) {
+    const scale = 4;
+    const canvas = document.createElement('canvas');
+    canvas.width = 220 * scale;
+    canvas.height = 60 * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.font = '600 22px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const textWidth = ctx.measureText(text).width;
+    const boxW = textWidth + 28;
+    const boxH = 32;
+    const boxX = 110 - boxW / 2;
+    const boxY = 30 - boxH / 2;
+    const r = 7;
+    ctx.fillStyle = 'rgba(4, 18, 11, .8)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, .4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(boxX + r, boxY);
+    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, r);
+    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, r);
+    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, r);
+    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(text, 110, 31);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 0, depthTest: true });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(6.6, 1.8, 1);
+    return sprite;
+  }
+
+  /* ---------------- 曾经做过的专案在地图上的位置标注 ---------------- */
+  function buildGlobeMarkers(radius) {
+    const group = new THREE.Group();
+    const items = [
+      { lat: 23.7, lon: 121.0, label: 'Taiwan' },
+      { lat: 46.6, lon: 2.2, label: 'France' },
+      { lat: 23.4, lon: 53.8, label: 'UAE' },
+      { lat: 49.4, lon: 8.7, label: 'Germany' },
+    ];
+
+    const markers = items.map(({ lat, lon, label }) => {
+      const pos = latLongToVector3(lat, lon, radius * 1.02);
+      const dotGeo = new THREE.SphereGeometry(radius * 0.018, 12, 12);
+      const dotMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0 });
+      const dot = new THREE.Mesh(dotGeo, dotMat);
+      dot.position.copy(pos);
+      group.add(dot);
+
+      const labelSprite = makeLabelSprite(label);
+      labelSprite.position.copy(pos.clone().multiplyScalar(1.14));
+      group.add(labelSprite);
+
+      return { dotMat, labelMat: labelSprite.material, direction: pos.clone().normalize(), opacity: 0 };
+    });
+
+    group.userData.markers = markers;
+    return group;
+  }
+
   /* ---------------- 旋转地球（Project & Program 背景） ---------------- */
   function buildGlobe() {
     const group = new THREE.Group();
     const radius = CONFIG.globeRadius;
 
-    // 实心内核，暗色调、跟背景融合，主要靠边缘一圈打光呈现球体轮廓
-    const coreGeo = new THREE.SphereGeometry(radius, 48, 32);
+    // 实心内核贴上简化的世界地图（海洋 + 七大洲色块）
+    const coreGeo = new THREE.SphereGeometry(radius, 64, 40);
     const coreMat = new THREE.MeshStandardMaterial({
-      color: '#0d2e1c',
-      roughness: 0.9,
+      map: buildEarthTexture(),
+      roughness: 0.85,
       metalness: 0,
       transparent: true,
       opacity: 0,
@@ -300,7 +430,7 @@ function init() {
     group.add(core);
 
     // 经纬线框，营造「地球仪／全球网络」的科技感
-    const wireGeo = new THREE.SphereGeometry(radius * 1.004, 24, 16);
+    const wireGeo = new THREE.SphereGeometry(radius * 1.006, 32, 20);
     const wireMat = new THREE.MeshBasicMaterial({
       color: '#bfe3d0',
       wireframe: true,
@@ -310,32 +440,43 @@ function init() {
     const wire = new THREE.Mesh(wireGeo, wireMat);
     group.add(wire);
 
-    // 散布在球面上的发光节点，像是国际连结的据点
-    const nodeCount = 70;
-    const nodePositions = new Float32Array(nodeCount * 3);
-    for (let i = 0; i < nodeCount; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const r = radius * 1.01;
-      nodePositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      nodePositions[i * 3 + 1] = r * Math.cos(phi);
-      nodePositions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
-    }
-    const nodeGeo = new THREE.BufferGeometry();
-    nodeGeo.setAttribute('position', new THREE.BufferAttribute(nodePositions, 3));
-    const nodeMat = new THREE.PointsMaterial({
-      color: '#ffffff',
-      size: 0.34,
+    // 我做过的专案所在地标注，转到面向镜头那一侧才会亮起来（见 updateGlobeMarkers）
+    const markers = buildGlobeMarkers(radius);
+    group.add(markers);
+    group.userData.markers = markers.userData.markers;
+
+    group.userData.fadeMats = [coreMat, wireMat];
+    return group;
+  }
+
+  // 首页山脉正上方（不是地形本身的部分）用一层大型天空半球做出蓝天的感觉，
+  // 只在 Hero 区块出现，Contact 虽然也共用山脉背景但不需要天空（见 updateFade）
+  function buildSky() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 2;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createLinearGradient(0, 0, 0, 512);
+    grad.addColorStop(0, '#0d3d73');
+    grad.addColorStop(0.4, '#3f7fb0');
+    grad.addColorStop(0.75, '#bcdcec');
+    grad.addColorStop(1, 'rgba(188,220,236,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 2, 512);
+    const texture = new THREE.CanvasTexture(canvas);
+
+    // 用完整球体（不只上半部），避免几何体在中途开口切出一圈硬边圆弧——
+    // 靠贴图本身在下缘淡到全透明去跟地形／雾融合，而不是靠裁掉幾何范围
+    const geo = new THREE.SphereGeometry(240, 24, 24);
+    const mat = new THREE.MeshBasicMaterial({
+      map: texture,
+      side: THREE.BackSide,
       transparent: true,
       opacity: 0,
       depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      fog: false,
     });
-    const nodes = new THREE.Points(nodeGeo, nodeMat);
-    group.add(nodes);
-
-    group.userData.fadeMats = [coreMat, wireMat, nodeMat];
-    return group;
+    return new THREE.Mesh(geo, mat);
   }
 
   const landscape = new THREE.Group();
@@ -359,6 +500,12 @@ function init() {
   const globe = buildGlobe();
   globe.position.set(CONFIG.cameraTarget[0], CONFIG.cameraTarget[1] + 14, CONFIG.cameraTarget[2]);
   scene.add(globe);
+  const Y_AXIS = new THREE.Vector3(0, 1, 0);
+
+  // 以摄影机环绕中心为球心，半径远大于摄影机环绕半径，不管拖曳怎么转都还是「站在天空里」
+  const sky = buildSky();
+  sky.position.set(CONFIG.cameraTarget[0], CONFIG.cameraTarget[1], CONFIG.cameraTarget[2]);
+  scene.add(sky);
 
   /* ---------------- 摄影机环绕：以 cameraTarget 为中心的球面座标 ---------------- */
   const target = new THREE.Vector3(...CONFIG.cameraTarget);
@@ -428,6 +575,8 @@ function init() {
   let cityMixTarget = 0;
   let globeMix = 0;
   let globeMixTarget = 0;
+  let heroSkyMix = 0;
+  let heroSkyMixTarget = 0;
 
   const sectionRatios = {};
   Object.keys(BACKDROP_BY_SECTION).forEach((id) => { sectionRatios[id] = 0; });
@@ -445,6 +594,8 @@ function init() {
     mountainMixTarget = backdrop === 'mountain' ? 1 : 0;
     cityMixTarget = backdrop === 'city' ? 1 : 0;
     globeMixTarget = backdrop === 'globe' ? 1 : 0;
+    // 蓝天只在真的捲到 Hero 时出现——Contact 虽然也用山脉背景，但不需要天空
+    heroSkyMixTarget = winnerId === 'hero' ? 1 : 0;
   }
 
   Object.keys(BACKDROP_BY_SECTION).forEach((id) => {
@@ -461,6 +612,8 @@ function init() {
     mountainMix += (mountainMixTarget - mountainMix) * CONFIG.cityMixEase;
     cityMix += (cityMixTarget - cityMix) * CONFIG.cityMixEase;
     globeMix += (globeMixTarget - globeMix) * CONFIG.cityMixEase;
+    heroSkyMix += (heroSkyMixTarget - heroSkyMix) * CONFIG.cityMixEase;
+    sky.material.opacity = heroSkyMix * 0.85;
 
     // 山脉/河流是不透明网格，没有 opacity 可以柔化，改成快要盖满画面时才整个隐藏/显示，
     // 其他背景（半透明）继续用 opacity 慢慢淡入淡出，视觉上还是一段柔和的过渡
@@ -477,10 +630,24 @@ function init() {
     city.userData.buildingMats.forEach((m) => { m.opacity = cityMix * 0.92; });
     city.userData.windowMat.opacity = cityMix * Math.min(1, cityMix * 1.4);
 
-    const [globeCoreMat, globeWireMat, globeNodeMat] = globe.userData.fadeMats;
+    const [globeCoreMat, globeWireMat] = globe.userData.fadeMats;
     globeCoreMat.opacity = globeMix * 0.95;
     globeWireMat.opacity = globeMix * 0.4;
-    globeNodeMat.opacity = globeMix * 0.9;
+  }
+
+  // 哪个标注目前转到面向镜头那一侧，就把它的地名牌淡入──呼应「转动地球，
+  // 做过的专案会跑出来」的效果；转到背面就淡出，避免一次全部挤在画面上
+  function updateGlobeMarkers() {
+    const toCamera = camera.position.clone().sub(globe.position).normalize();
+    globe.userData.markers.forEach((m) => {
+      const worldDir = m.direction.clone().applyAxisAngle(Y_AXIS, globe.rotation.y);
+      const facing = worldDir.dot(toCamera);
+      const target = facing > 0.15 ? 1 : 0;
+      m.opacity += (target - m.opacity) * 0.08;
+      const finalOpacity = m.opacity * globeMix;
+      m.dotMat.opacity = finalOpacity * 0.95;
+      m.labelMat.opacity = finalOpacity * 0.95;
+    });
   }
 
   /* ---------------- 缩放 ---------------- */
@@ -502,6 +669,7 @@ function init() {
     river1.material.uniforms.uTime.value += dt;
     river2.material.uniforms.uTime.value += dt;
     globe.rotation.y += CONFIG.globeRotationSpeed * dt;
+    updateGlobeMarkers();
     updateFade();
 
     renderer.render(scene, camera);

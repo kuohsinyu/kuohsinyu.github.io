@@ -70,6 +70,12 @@ const TRANSLATIONS = {
     'uae-bullet2': '<strong>Cross-Disciplinary Business Thinking:</strong> Participated in entrepreneurship workshops and visits to leading local museums, integrating technology, human resources, and ESG (Environmental, Social, and Governance) thinking.',
     'exp-source': 'Source: NTNU News →',
 
+    'heidelberg-title': 'Heidelberg University Exchange Program',
+    'heidelberg-org': 'MOE 學海飛揚 Scholarship for Study Abroad — Heidelberg, Germany',
+    'heidelberg-date': '2025 – 2026',
+    'heidelberg-bullet1': "Selected for a fully-funded academic year abroad under Taiwan's Ministry of Education 學海飛揚 Scholarship for Outstanding Students Studying Abroad.",
+    'heidelberg-bullet2': 'Continuing coursework in a new academic and cultural environment — adapting to a different language, teaching style, and daily life while building an international network.',
+
     'photo-1': 'PHOTO 1',
     'photo-2': 'PHOTO 2',
     'photo-3': 'PHOTO 3',
@@ -141,6 +147,12 @@ const TRANSLATIONS = {
     'uae-bullet1': '<strong>永續專案實踐：</strong>深度參與阿聯酋當地的環境永續倡議，包含實地綠色植樹計畫、跨國青年座談與極端氣候適應體驗。',
     'uae-bullet2': '<strong>跨領域商務思維：</strong>對接企業家精神研習與當地頂尖博物館參訪，將科技、人力資源與永續發展（ESG）思維深度結合。',
     'exp-source': '資料來源：師大新聞 →',
+
+    'heidelberg-title': '海德堡大學交換計畫',
+    'heidelberg-org': '教育部學海飛揚獎學金 — 德國海德堡',
+    'heidelberg-date': '2025 – 2026',
+    'heidelberg-bullet1': '獲選教育部學海飛揚獎學金全額補助，赴德國海德堡大學進行為期一年的交換學習。',
+    'heidelberg-bullet2': '在全新的學術與文化環境中持續進修——適應不同的語言、教學方式與生活步調，同時建立國際人脈網絡。',
 
     'photo-1': '照片 1',
     'photo-2': '照片 2',
