@@ -248,39 +248,30 @@ body::before{
   50%{ transform: translateY(-5px); }
 }
 
-/* About Me 右侧两张照片，取代原本的 "YOUR PHOTO HERE" 占位框，固定尺寸、
-   一左一右两张照片。放大之后（180x246 x2 张 + 间距）已经放不进 .about-layout
-   原本的 flex 排版（section 本身宽度上限只有 1140px，扣掉左右 padding 剩下
-   约 780px，装不下文字栏 + 两张放大后的照片），会被 flex-wrap 挤到下一行、
-   也对不齐 nav。改成绝对定位、直接贴齐 section 自己的右边界——section 的
-   右边界（max-width: 1140px）本来就跟 nav 上「PROJECT & PROGRAM」的位置很接近，
-   脱离 flex 排版的宽度限制反而更容易对齐，且不受浏览器宽度换算精细度影响 */
+/* About Me 底下两张照片，取代原本的 "YOUR PHOTO HERE" 占位框。
+   之前用绝对定位贴齐 section 右边界，结果照片飘在离文字很远的空白处，
+   看起来仍然像个小角落装饰。改回正常排版，放在两段文字下面单独一整行，
+   横向空间不用再跟文字栏分——每张可以放到 350x478，比之前大一截。 */
 .about-photos{
-  position: absolute;
-  top: 210px;
-  right: 0;
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 36px;
+  margin-top: 40px;
 }
 
 .about-photo{
   position: relative;
   flex: 0 0 auto;
-  width: 180px;
-  height: 246px;
-  border-radius: 8px;
+  width: 350px;
+  height: 478px;
+  border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .18);
   transition: transform .4s ease, box-shadow .4s ease;
 }
 
-.about-photo:nth-child(1){ transform: rotate(-3deg); }
-.about-photo:nth-child(2){ transform: rotate(3deg); margin-top: 24px; }
-
-/* 照片改成绝对定位、贴齐 section 右边界之后，段落文字原本 640px 的宽度会一路
-   延伸到照片底下、被盖住一截。这里单独把 About 的文字栏收窄，留出照片的位置 */
-#about .section-text{ max-width: 500px; }
+.about-photo:nth-child(1){ transform: rotate(-2deg); }
+.about-photo:nth-child(2){ transform: rotate(2deg); margin-top: 20px; }
 
 .about-photo img{
   width: 100%;
@@ -289,12 +280,30 @@ body::before{
   display: block;
 }
 
-/* 加上 .about-photos 祖先限定选择器，跟下面 nth-child 的 rotate 规则比specificity
-   赢得毫无悬念，不需要靠「写在后面」这种脆弱的排序去赢过 tie-break */
+/* 加上 .about-photos 祖先限定选择器，跟上面 nth-child 的 rotate 规则比 specificity
+   赢得毫无悬念，不需要靠「写在后面」这种脆弱的排序去赢过 tie-break。
+   z-index 之前只给了 20——跟固定导航栏（.nav 是 z-index:100，且跟这张照片
+   同一个「根」层叠上下文，没有任何祖先建立新的层叠上下文能把它隔开）比较时
+   20 输给 100，悬停放大时上緣会被导航栏盖掉一截。这里直接给到 300，
+   确保盖过 nav（100）跟其他所有一般内容，但仍然低于自订游标（9999）。 */
 .about-photos .about-photo:hover{
   transform: scale(2);
-  z-index: 20;
+  z-index: 300;
   box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
+}
+
+/* About Me 底下的 YouTube 影片嵌入 */
+.about-video{
+  margin-top: 40px;
+  max-width: 700px;
+}
+
+.about-video iframe{
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 10px;
 }
 
 /* 向下滚动提示 */
@@ -406,17 +415,24 @@ body::before{
    ＋ backdrop-filter 把背后的动画压暗模糊，白字才吃得住对比。 */
 .exp-card{
   position: relative;
+  z-index: 1;
   border: 1px solid rgba(255, 255, 255, .22);
   border-radius: 12px;
   background: rgba(4, 18, 11, .58);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   padding: 26px 26px 24px;
-  transition: border-color .4s ease, background .4s ease, color .3s ease;
+  transition: border-color .4s ease, background .4s ease, color .3s ease, z-index 0s;
 }
 
+/* backdrop-filter 会让 .exp-card 自己形成一个新的层叠上下文（stacking context），
+   卡片里面不管给放大的照片多高的 z-index，都只是在这个卡片「内部」比大小，
+   卡片整体本身在外面（跟固定导航栏 .nav 的 z-index:100 比）还是原本那个层级。
+   所以要让放大的照片盖过 nav，必须把卡片本身的 z-index 一起拉高，
+   不能只调卡片里面那张照片的 z-index。 */
 .exp-card:hover,
 .exp-card:focus-within{
+  z-index: 300;
   border-color: rgba(255, 255, 255, .6);
   /* 展开时把底色再压暗一点：这时候文字最多，最需要对比 */
   background: rgba(4, 18, 11, .82);
@@ -615,7 +631,9 @@ body::before{
    reveal 规则高一截，赢得毫无悬念，不用再靠「写在后面」这种脆弱的排序去 tie-break */
 .exp-card .exp-photo.has-img:hover{
   transform: scale(2);
-  z-index: 20;
+  /* 跟 .about-photo 一样的问题：z-index:20 比固定导航栏（.nav, z-index:100）低，
+     卡片离画面上緣够近时放大会被 nav 盖掉一截。统一拉到 300。 */
+  z-index: 300;
   box-shadow: 0 16px 46px rgba(0, 0, 0, .55);
 }
 
