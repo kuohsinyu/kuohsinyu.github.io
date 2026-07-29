@@ -20,6 +20,8 @@ function init() {
     particleCount: 260,
     cityBuildingCount: 30,
     cityWindowCount: 260,
+    globeRadius: 11,
+    globeRotationSpeed: 0.12,
     autoDriftSpeed: 0.035,
     dragSensitivity: 0.005,
     cityMixEase: 0.035,
@@ -77,14 +79,22 @@ function init() {
     const n = fbm(x, y, 4);
     return Math.pow(1 - Math.abs(n * 2 - 1), 1.5);
   }
-  function riverCenterZ(x) {
+  // 两条河流各自的中心线，都刻意让 x 落在镜头看向的区域里（跟原本单一河流验证过、
+  // 不会跟左侧标题文字重叠的范围一致），地形范围虽然放大了很多，但摄影机看的还是
+  // 同一小片区域，河流没有必要跟着铺到整块地图那么远
+  function riverCenterZ1(x) {
     return Math.sin(x * 0.12) * 5 + Math.sin(x * 0.05) * 3;
+  }
+  function riverCenterZ2(x) {
+    return riverCenterZ1(x) + 16 + Math.sin(x * 0.07 + 1.3) * 4;
   }
 
   /* ---------------- 山脉地形 ---------------- */
   function buildTerrain() {
-    const size = 70;
-    const segments = 100;
+    // 地形整体放大很多，边界会被推到摄影机视野以外，才不会再看到明显的正方形边线；
+    // 摄影机本身没有跟着拉远，看到的仍是同一小片、之前已经调好构图的区域
+    const size = 320;
+    const segments = 170;
     const geo = new THREE.PlaneGeometry(size, size, segments, segments);
     geo.rotateX(-Math.PI / 2);
 
@@ -98,15 +108,22 @@ function init() {
       const x = pos.getX(i);
       const z = pos.getZ(i);
 
-      const ridge = ridgeNoise(x * 0.05, z * 0.05) * 5 + ridgeNoise(x * 0.14, z * 0.14) * 1.4;
-      const distToRiver = Math.abs(z - riverCenterZ(x));
+      // 加一层更低频率的噪声，做出更宏大、起伏更大的山势（更高的山）
+      const ridge = ridgeNoise(x * 0.018, z * 0.018) * 8
+        + ridgeNoise(x * 0.05, z * 0.05) * 5
+        + ridgeNoise(x * 0.14, z * 0.14) * 1.6;
+
       // 河道要留一段完全平坦（0 高度）的河床宽度，比河流本身的宽度更宽一点，
       // 否则河流两侧的地形边坡会比河面高，从远处看会把河流整条挡住
-      const valleyMask = THREE.MathUtils.smoothstep(distToRiver, 2.6, 9);
+      const dist1 = Math.abs(z - riverCenterZ1(x));
+      const dist2 = Math.abs(z - riverCenterZ2(x));
+      const mask1 = THREE.MathUtils.smoothstep(dist1, 2.6, 9);
+      const mask2 = THREE.MathUtils.smoothstep(dist2, 2.6, 9);
+      const valleyMask = Math.min(mask1, mask2);
       const height = ridge * valleyMask;
       pos.setY(i, height);
 
-      const t = THREE.MathUtils.clamp(height / 6, 0, 1);
+      const t = THREE.MathUtils.clamp(height / 10, 0, 1);
       const c = new THREE.Color();
       if (t < 0.5) c.copy(valleyColor).lerp(rockColor, t / 0.5);
       else c.copy(rockColor).lerp(peakColor, (t - 0.5) / 0.5);
@@ -131,13 +148,13 @@ function init() {
   }
 
   /* ---------------- 发光河流（沿地形山谷路径的一条自订飘带） ---------------- */
-  function buildRiver() {
+  function buildRiver(centerZFn, xStart, xEnd) {
     const segments = 140;
     const halfWidth = 1.1 * CONFIG.riverGlowWidthScale;
     const pts = [];
     for (let i = 0; i <= segments; i++) {
-      const x = -35 + (70 * i) / segments;
-      pts.push(new THREE.Vector2(x, riverCenterZ(x)));
+      const x = xStart + ((xEnd - xStart) * i) / segments;
+      pts.push(new THREE.Vector2(x, centerZFn(x)));
     }
 
     const positions = [];
@@ -265,18 +282,83 @@ function init() {
     return group;
   }
 
+  /* ---------------- 旋转地球（Project & Program 背景） ---------------- */
+  function buildGlobe() {
+    const group = new THREE.Group();
+    const radius = CONFIG.globeRadius;
+
+    // 实心内核，暗色调、跟背景融合，主要靠边缘一圈打光呈现球体轮廓
+    const coreGeo = new THREE.SphereGeometry(radius, 48, 32);
+    const coreMat = new THREE.MeshStandardMaterial({
+      color: '#0d2e1c',
+      roughness: 0.9,
+      metalness: 0,
+      transparent: true,
+      opacity: 0,
+    });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    group.add(core);
+
+    // 经纬线框，营造「地球仪／全球网络」的科技感
+    const wireGeo = new THREE.SphereGeometry(radius * 1.004, 24, 16);
+    const wireMat = new THREE.MeshBasicMaterial({
+      color: '#bfe3d0',
+      wireframe: true,
+      transparent: true,
+      opacity: 0,
+    });
+    const wire = new THREE.Mesh(wireGeo, wireMat);
+    group.add(wire);
+
+    // 散布在球面上的发光节点，像是国际连结的据点
+    const nodeCount = 70;
+    const nodePositions = new Float32Array(nodeCount * 3);
+    for (let i = 0; i < nodeCount; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = radius * 1.01;
+      nodePositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      nodePositions[i * 3 + 1] = r * Math.cos(phi);
+      nodePositions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+    }
+    const nodeGeo = new THREE.BufferGeometry();
+    nodeGeo.setAttribute('position', new THREE.BufferAttribute(nodePositions, 3));
+    const nodeMat = new THREE.PointsMaterial({
+      color: '#ffffff',
+      size: 0.34,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    const nodes = new THREE.Points(nodeGeo, nodeMat);
+    group.add(nodes);
+
+    group.userData.fadeMats = [coreMat, wireMat, nodeMat];
+    return group;
+  }
+
   const landscape = new THREE.Group();
   landscape.position.x = CONFIG.groupOffsetX;
   scene.add(landscape);
 
   const terrain = buildTerrain();
-  const river = buildRiver();
+  // 两条河流的可见范围都刻意留在镜头看向的那一小片区域（跟原本验证过、不会盖到
+  // 左侧标题文字的范围一致），地图放大后的其余区域就单纯是山，没有河流也没关系
+  const river1 = buildRiver(riverCenterZ1, -35, 35);
+  const river2 = buildRiver(riverCenterZ2, -20, 45);
   const particles = buildParticles(CONFIG.particleCount);
-  landscape.add(terrain, river, particles);
+  landscape.add(terrain, river1, river2, particles);
 
   const city = buildCity();
   city.position.x = CONFIG.groupOffsetX;
   scene.add(city);
+
+  // 地球放在跟摄影机目标点差不多的位置、稍微垫高，不管镜头怎么自动漂移都还是
+  // 大致置中，不需要为了这个背景另外调一套摄影机参数
+  const globe = buildGlobe();
+  globe.position.set(CONFIG.cameraTarget[0], CONFIG.cameraTarget[1] + 14, CONFIG.cameraTarget[2]);
+  scene.add(globe);
 
   /* ---------------- 摄影机环绕：以 cameraTarget 为中心的球面座标 ---------------- */
   const target = new THREE.Vector3(...CONFIG.cameraTarget);
@@ -329,32 +411,76 @@ function init() {
     }
   }
 
-  /* ---------------- 捲到 About 时：山脉/河流淡出，城市淡入 ---------------- */
+  /* ---------------- 依照目前捲到哪个区块，决定显示山脉／城市／地球／都不显示 ---------------- */
+  // hero、contact 都用山脉+河流；about 是城市剪影；experience 整个背景收起来
+  // （改用白底绿字，见 style.css）；projects 是旋转地球
+  const BACKDROP_BY_SECTION = {
+    hero: 'mountain',
+    about: 'city',
+    experience: 'none',
+    projects: 'globe',
+    contact: 'mountain',
+  };
+
+  let mountainMix = 1;
+  let mountainMixTarget = 1;
   let cityMix = 0;
   let cityMixTarget = 0;
-  const aboutEl = document.getElementById('about');
-  if (aboutEl) {
-    const aboutObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        cityMixTarget = entry.intersectionRatio >= 0.35 ? 1 : 0;
-      });
-    }, { threshold: [0, 0.35, 1] });
-    aboutObserver.observe(aboutEl);
+  let globeMix = 0;
+  let globeMixTarget = 0;
+
+  const sectionRatios = {};
+  Object.keys(BACKDROP_BY_SECTION).forEach((id) => { sectionRatios[id] = 0; });
+
+  function applyBackdropTargets() {
+    let winnerId = 'hero';
+    let best = -1;
+    Object.keys(sectionRatios).forEach((id) => {
+      if (sectionRatios[id] > best) {
+        best = sectionRatios[id];
+        winnerId = id;
+      }
+    });
+    const backdrop = BACKDROP_BY_SECTION[winnerId];
+    mountainMixTarget = backdrop === 'mountain' ? 1 : 0;
+    cityMixTarget = backdrop === 'city' ? 1 : 0;
+    globeMixTarget = backdrop === 'globe' ? 1 : 0;
   }
 
-  function updateFade() {
-    cityMix += (cityMixTarget - cityMix) * CONFIG.cityMixEase;
+  Object.keys(BACKDROP_BY_SECTION).forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { sectionRatios[id] = entry.intersectionRatio; });
+      applyBackdropTargets();
+    }, { threshold: [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1] });
+    observer.observe(el);
+  });
 
-    // 山脉/河流是不透明网格，没有 opacity 可以柔化，改成城市快盖满画面时才整个隐藏，
-    // 城市本身（半透明）继续用 opacity 慢慢淡入，视觉上还是一段柔和的过渡
-    const showLandscape = cityMix < 0.6;
+  function updateFade() {
+    mountainMix += (mountainMixTarget - mountainMix) * CONFIG.cityMixEase;
+    cityMix += (cityMixTarget - cityMix) * CONFIG.cityMixEase;
+    globeMix += (globeMixTarget - globeMix) * CONFIG.cityMixEase;
+
+    // 山脉/河流是不透明网格，没有 opacity 可以柔化，改成快要盖满画面时才整个隐藏/显示，
+    // 其他背景（半透明）继续用 opacity 慢慢淡入淡出，视觉上还是一段柔和的过渡
+    const showLandscape = mountainMix > 0.4;
     terrain.visible = showLandscape;
-    river.visible = showLandscape;
-    river.material.uniforms.uBrightness.value = CONFIG.riverBrightness * Math.max(0, 1 - cityMix / 0.6);
-    particles.material.opacity = 0.5 * (1 - cityMix * 0.6);
+    const riverBrightness = CONFIG.riverBrightness * THREE.MathUtils.clamp((mountainMix - 0.4) / 0.6, 0, 1);
+    [river1, river2].forEach((r) => {
+      r.visible = showLandscape;
+      r.material.uniforms.uBrightness.value = riverBrightness;
+    });
+
+    particles.material.opacity = 0.5 * Math.max(mountainMix, cityMix, globeMix);
 
     city.userData.buildingMats.forEach((m) => { m.opacity = cityMix * 0.92; });
     city.userData.windowMat.opacity = cityMix * Math.min(1, cityMix * 1.4);
+
+    const [globeCoreMat, globeWireMat, globeNodeMat] = globe.userData.fadeMats;
+    globeCoreMat.opacity = globeMix * 0.95;
+    globeWireMat.opacity = globeMix * 0.4;
+    globeNodeMat.opacity = globeMix * 0.9;
   }
 
   /* ---------------- 缩放 ---------------- */
@@ -373,7 +499,9 @@ function init() {
     if (!dragging) theta += CONFIG.autoDriftSpeed * dt;
     updateCameraPosition();
 
-    river.material.uniforms.uTime.value += dt;
+    river1.material.uniforms.uTime.value += dt;
+    river2.material.uniforms.uTime.value += dt;
+    globe.rotation.y += CONFIG.globeRotationSpeed * dt;
     updateFade();
 
     renderer.render(scene, camera);
