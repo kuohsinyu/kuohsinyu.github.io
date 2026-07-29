@@ -230,22 +230,26 @@ document.addEventListener('DOMContentLoaded', () => {
   if (expStage && expSpotlight) {
     const NAV_HEIGHT = 96;
 
-    function openExperience(id) {
-      expStage.classList.add('is-open');
-      expSpotlight.dataset.active = id;
-    }
-
-    function closeExperience() {
-      expStage.classList.remove('is-open');
-      delete expSpotlight.dataset.active;
-    }
-
     // hover-intent：鼠标移动经过卡片前往别处时不该抢先打开它，只有「停下来」
     // 停留满一段时间才算数——用 mousemove 持续重设计时器，路过时事件不会停，
     // 只有真的停在某张卡片上才会让计时器归零并打开
     const HOVER_INTENT_DELAY = 120;
     let intentTimer = null;
     let intentTarget = null;
+
+    function openExperience(id) {
+      expStage.classList.add('is-open');
+      expSpotlight.dataset.active = id;
+    }
+
+    function closeExperience() {
+      // 一定要把还没触发的 hover-intent 计时器也清掉，不然明明关闭了，
+      // 之前排队要打开的那个还是会在 120ms 后把它重新打开，变成关不掉
+      clearTimeout(intentTimer);
+      intentTarget = null;
+      expStage.classList.remove('is-open');
+      delete expSpotlight.dataset.active;
+    }
 
     function scheduleOpen(el) {
       intentTarget = el;
@@ -279,6 +283,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.addEventListener('mouseleave', closeExperience);
     if (nav) nav.addEventListener('mouseenter', closeExperience);
+
+    // 聚光灯是 position:fixed，捲动页面时不会自动跟着离开视窗，鼠标又没动的话
+    // 就永远收不到关闭信号——卷动时一律直接关闭，避免遮罩卡在画面上关不掉
+    window.addEventListener('scroll', () => {
+      if (expStage.classList.contains('is-open')) closeExperience();
+    }, { passive: true });
+
+    // 按 Esc 也能直接关闭
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && expStage.classList.contains('is-open')) closeExperience();
+    });
 
     // 键盘操作：焦点离开整个 stage 时重置
     expStage.addEventListener('focusout', (e) => {
