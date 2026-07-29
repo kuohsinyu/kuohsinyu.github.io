@@ -18,8 +18,6 @@ function init() {
     riverBrightness: 1.35,
     riverGlowWidthScale: 1.9,
     particleCount: 260,
-    cityBuildingCount: 30,
-    cityWindowCount: 260,
     globeRadius: 22,
     globeRotationSpeed: 0.12,
     autoDriftSpeed: 0.035,
@@ -39,6 +37,9 @@ function init() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(renderer.domElement);
+  // 城市背景是独立的正交相机全屏 shader，跟主场景分开渲染再叠在一起，
+  // 所以不能用默认的 autoClear，要自己控制清除时机（见 animate()）
+  renderer.autoClear = false;
 
   scene.add(new THREE.AmbientLight('#3a4a40', 1.6));
   const moon = new THREE.DirectionalLight('#dff2e6', 1.3);
@@ -241,50 +242,297 @@ function init() {
     return new THREE.Points(geo, mat);
   }
 
-  /* ---------------- 城市剪影（捲到 About 时淡入取代山脉） ---------------- */
-  function buildCity() {
-    const group = new THREE.Group();
-    const buildingMats = [];
+  /* ---------------- 城市背景：kishimisu 的《Elevator to infinity》raymarching shader
+     （CC BY-NC-SA 4.0，https://www.shadertoy.com/view/mddfW8），捲到 About／Experience
+     时淡入取代山脉，用正交相机＋全屏四边形跑在独立的场景里，跟主场景分开渲染再叠图 ---------------- */
+  function buildCityNoiseTexture() {
+    // 原始 shader 的 iChannel0 只是拿来在建筑表面做一层很淡的噪声遮罩，
+    // 不需要还原成原本 Shadertoy 用的确切贴图，随手生成的灰阶噪声效果就够接近了
+    const size = 256;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const img = ctx.createImageData(size, size);
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const v = Math.floor(hash(x, y) * 255);
+        const i = (y * size + x) * 4;
+        img.data[i] = v;
+        img.data[i + 1] = v;
+        img.data[i + 2] = v;
+        img.data[i + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }
 
-    for (let i = 0; i < CONFIG.cityBuildingCount; i++) {
-      const w = 1.2 + Math.random() * 2.2;
-      const d = 1.2 + Math.random() * 2.2;
-      const h = 2.5 + Math.random() * 11;
-      const geo = new THREE.BoxGeometry(w, h, d);
-      const mat = new THREE.MeshStandardMaterial({
-        color: '#081f13',
-        roughness: 1,
-        transparent: true,
-        opacity: 0,
-      });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set((Math.random() - 0.5) * 42, h / 2, -6 - Math.random() * 24);
-      group.add(mesh);
-      buildingMats.push(mat);
+  const CITY_SHADER_FRAGMENT = `precision highp float;
+
+uniform float iTime;
+uniform vec3 iResolution;
+uniform vec4 iMouse;
+uniform sampler2D iChannel0;
+uniform float uOpacity;
+
+out vec4 fragColor;
+
+/* Elevator to infinity by @kishimisu (2023)  -  https://www.shadertoy.com/view/mddfW8
+   This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike
+   4.0 International License (https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en)
+*/
+
+float acc = 0.; // Neon light accumulation
+float occ = 1.; // Ambient occlusion (Fake)
+
+// 2D rotation
+#define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
+
+// Domain rep.
+#define rep(p, r) mod(p+r, r+r)-r
+
+// Domain rep. ID
+#define rid(p, r) floor((p+r)/(r+r))
+
+// Finite domain rep.
+#define lrep(p, r, l) p-r*clamp(round(p/r), -l, l)
+
+// Fast random noise 2 -> 3
+vec3 hash(vec2 p) {
+    vec2 r = fract(sin(p*mat2(137.1, 12.7, 74.7, 269.5)) * 43478.5453);
+    return vec3(r, fract(r.x*r.y*1121.67));
+}
+// Random noise 3 -> 3 - https://shadertoyunofficial.wordpress.com/2019/01/02/
+#define hash33(p) fract(sin(p*mat3(127.1,311.7,74.7,269.5,183.3,246.1,113.5,271.9,124.6))*43758.5453123)
+
+// Distance functions - https://iquilezles.org/articles/distfunctions/
+float box(vec3 p, vec3 b) {
+    vec3 q = abs(p) - b;
+    return length(max(q, 0.)) + min(max(q.x, max(q.y, q.z)), 0.);
+}
+float rect(vec2 p, vec2 b) {
+    vec2 d = abs(p) - b;
+    return length(max(d, 0.)) + min(max(d.x, d.y), 0.);
+}
+
+#define ext 2.
+float opElevatorWindows(vec3 p, float b) {
+    float e  = box(p, vec3(ext*.8, 2.7, .3));
+    float lv = length(p.xz) - .1;   p.y += 1.;
+    float lh = length(p.yz) - .1;
+    lh = max(b, lh);
+    b  = max(b, -e);
+    b  = min(b, min(lv, lh));
+    return b;
+}
+
+float building(vec3 p0, vec3 p, float L) {
+    float B = rect(p.xz, vec2(L, 10)); // Main building
+    float B2 = rect(vec2(abs(p.x)-L-ext, p.z), vec2(ext, 10)); // Elevator building
+
+    // (Optim) Skip building calculations
+    if (min(B, B2) > .2) return min(B, B2);
+
+    vec3 q = p;
+    float var = step(1., mod(rid(p.y, 3.), 6.)); // Railing variation
+    p.y = rep(p.y, 3.); // Infinite floor y-repetition
+    vec3 pb = vec3(abs(p.x), p.yz);
+
+    // Building lights
+    vec3  id = rid(vec3(q.xy, p0.z), vec3(21, 18, 48));
+    vec3  rn = hash33(id);
+    float rw = fract(rn.x*rn.z*1021.67);
+
+    q.x += 14. * (rn.x*3.-1.);
+    q.y += 12. * (floor(rn.y*3.)-1.);
+    q.xy = rep(q.xy, vec2(21, 18));
+
+    float l = box(q, vec3(mix(3., 15., rw), rn.z*1.5+.5, 7));
+    acc += .5 / (1. + pow(abs(l)*20., 1.5))
+                * smoothstep(0., .4, iTime - rw * 20.)
+                * step(p0.x, 10. + 2e2*step(20., abs(p0.z)));
+
+    // Occlusion
+    occ = min(occ, smoothstep(3.5, 0., -rect(p.xz, vec2(L+2.,10))));
+    occ = min(occ, smoothstep(0.6, 0., -rect(pb.xz-vec2(L+ext,0), vec2(ext,10))));
+
+    // Front hole
+    q = p;
+    q.x = rep(q.x, 7.);
+    q.y -= (1. - var)*1.01;
+
+    float f = box(q + vec3(0,0,10), vec3(6.6, 2. + var, 3));
+    B = max(B, -f);
+    B = max(B, -rect(q.xz + vec2(0,10), vec2(6.6, .7)*var));
+
+    // Railing
+    q = p;
+    q.x = rep(q.x, .8);
+
+    float r  = length(p.yz + vec2(1, 9.5-var*.5)) - .2;
+    float rv = length(q.xz + vec2(0, 9.5-var*.5)) - .16;
+    r = min(r, rv);
+    r = max(r, p.y + 1.);
+
+    // Back bars
+    q = p;
+    q.x = rep(q.x, 1.75);
+
+    float b = length(q.xz + vec2(0, 7.3)) - .2;
+    r = min(r, b);
+
+    B = min(B, r);
+    B = max(B, abs(p.x) - L);
+
+    // (Optim) Skip elevator calculations
+    if (B2 > .04) return min(B, B2);
+
+    // Elevator
+    B2 = opElevatorWindows(pb - vec3(L+ext,0,-9.9), B2);
+    B2 = opElevatorWindows(vec3(pb.z+8., pb.y, pb.x-L-ext-1.9), B2);
+
+    // Side windows
+    q = vec3(pb.xy, pb.z - 1.8);
+    q.z = lrep(q.z, 2.5, 2.);
+
+    float w = box(q - vec3(L+ext*2.,1.2,0), vec3(.5, 1.6, 1.2));
+    B2 = max(B2, -w);
+
+    return min(B, B2);
+}
+
+float map(vec3 p) {
+    vec2 id = vec2(step(40., p.x), rid(p.z, 140.));
+    vec3 rn = mix(vec3(1, -.5, 0), hash(id), step(.5, id.x+id.y));
+
+    // Buildings
+    vec3 p0 = p;
+    p.x = abs(abs(p.x - 40.) - 80.);
+    p.z = rep(p.z - id.x*200., 200.);
+
+    float bL = 21.4 + id.y*3.;
+    float b1 = building(p0, p - vec3(30,0,0), bL);
+    float b2 = building(p0, vec3(p.z,p.y,-p.x), 185.);
+
+    // Elevator lights
+    float rpy = 80. + 150. * rn.x;;
+    p.y = rep(p.y - iTime * 40. * (rn.y*.5+.5), rpy);
+    p -= vec3(30.+bL+ext, rn.z*rpy*.5, ext-10.);
+
+    float l = box(p, vec3(ext*.8, 2.7, ext*.8));
+    acc += .5 / (1. + pow(abs(l)*18., 1.17));
+
+    // Fix broken distance before 20s
+    b2 = min(b2, abs(p0.x + p0.z - 30.) + 6.);
+
+    return min(b1, b2);
+}
+
+// https://iquilezles.org/articles/normalsSDF/
+vec3 normal(vec3 p) {
+    const vec2 k = vec2(1,-1)*.0001;
+    return normalize(k.xyy*map(p + k.xyy) + k.yyx*map(p + k.yyx) +
+                     k.yxy*map(p + k.yxy) + k.xxx*map(p + k.xxx));
+}
+
+void mainImage(out vec4 O, vec2 F) {
+    vec2  R = iResolution.xy,
+          u = (F+F-R)/R.y,
+          M = iMouse.xy/R * 2. - 1.;
+          M *= step(1., iMouse.z);
+
+    // Camera animation
+    float T  = 1. - pow(1. - clamp(iTime*.025, 0., 1.), 3.);
+    float ax = mix(-.8, .36, T);
+    float az = mix(-40., -140., T);
+    float rx = M.x*.45 - (cos(iTime*.1)*.5+.5)*.4;
+    rx = clamp(ax + rx - .55, min(iTime*.05 - 1.6, -.9), .1);
+
+    // Ray origin & direction
+    vec3 ro = vec3(0, iTime*10., az);
+    vec3 rd = normalize(vec3(u, 3));
+
+    rd.zy *= rot(M.y*1.3);
+    rd.zx *= rot(rx);
+    ro.zx *= rot(rx);
+
+    // Raymarching
+    vec3 p; float d, t = 0.;
+    for (int i = 0; i < 60; i++) {
+        p = ro + t * rd;
+        t += d = map(p);
+        if (d < .01 || t > 2200.) break;
     }
 
-    const winPositions = new Float32Array(CONFIG.cityWindowCount * 3);
-    for (let i = 0; i < CONFIG.cityWindowCount; i++) {
-      const b = group.children[Math.floor(Math.random() * group.children.length)];
-      winPositions[i * 3] = b.position.x + (Math.random() - 0.5) * b.geometry.parameters.width;
-      winPositions[i * 3 + 1] = Math.random() * b.geometry.parameters.height;
-      winPositions[i * 3 + 2] = b.position.z + (Math.random() - 0.5) * b.geometry.parameters.depth + 0.1;
-    }
-    const winGeo = new THREE.BufferGeometry();
-    winGeo.setAttribute('position', new THREE.BufferAttribute(winPositions, 3));
-    const winMat = new THREE.PointsMaterial({
-      color: '#ffffff',
-      size: 0.16,
+    // Base color
+    vec3 col = vec3(.13,.11,.26) - vec3(1,1,0)*abs(p.x-40.)*.001;
+    col *= clamp(1. + dot(normal(p), normalize(vec3(0,0,1))), .5, 1.);
+
+    // Texture
+    col *= 1. - texture(iChannel0, vec2(p.x+p.z, p.y+p.z)*.05).rgb*.7;
+
+    // Occlusion
+    col *= occ;
+
+    // Exponential fog
+    col = mix(vec3(.002,.005,.015), col, exp(-t*.0025*vec3(.8,1,1.2) - length(u)*.5));
+
+    // Light accumulation
+    col += acc * mix(vec3(1,.97,.76), vec3(1,.57,.36), t*.0006);
+
+    // Color correction
+    col = pow(col, .46*vec3(.98,.96,1));
+
+    // Vignette
+    u = F/R; u *= 1. - u.yx;
+    col *= pow(clamp(u.x * u.y * 80., 0., 1.), .2);
+
+    O = vec4(col, 1);
+}
+
+void main() {
+    vec4 O;
+    mainImage(O, gl_FragCoord.xy);
+    fragColor = vec4(O.rgb, uOpacity);
+}
+`;
+
+  const CITY_SHADER_VERTEX = `in vec3 position;
+void main() {
+  gl_Position = vec4(position.xy, 0.0, 1.0);
+}
+`;
+
+  function buildCityShaderPass() {
+    const shaderScene = new THREE.Scene();
+    const shaderCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const uniforms = {
+      iTime: { value: 0 },
+      iResolution: { value: new THREE.Vector3(1, 1, 1) },
+      iMouse: { value: new THREE.Vector4(0, 0, 0, 0) },
+      iChannel0: { value: buildCityNoiseTexture() },
+      uOpacity: { value: 0 },
+    };
+
+    const material = new THREE.RawShaderMaterial({
+      glslVersion: THREE.GLSL3,
+      uniforms,
+      vertexShader: CITY_SHADER_VERTEX,
+      fragmentShader: CITY_SHADER_FRAGMENT,
       transparent: true,
-      opacity: 0,
+      depthTest: false,
       depthWrite: false,
     });
-    const windows = new THREE.Points(winGeo, winMat);
-    group.add(windows);
 
-    group.userData.buildingMats = buildingMats;
-    group.userData.windowMat = winMat;
-    return group;
+    const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+    shaderScene.add(quad);
+
+    return { shaderScene, shaderCamera, uniforms };
   }
 
   /* ---------------- 经纬度 → 球面座标（跟下面画大陆用的等距圆柱投影对齐） ---------------- */
@@ -457,9 +705,8 @@ function init() {
   const particles = buildParticles(CONFIG.particleCount);
   landscape.add(terrain, river1, river2, particles);
 
-  const city = buildCity();
-  city.position.x = CONFIG.groupOffsetX;
-  scene.add(city);
+  const cityShader = buildCityShaderPass();
+  cityShader.uniforms.iResolution.value.set(renderer.domElement.width, renderer.domElement.height, 1);
 
   // 地球放在跟摄影机目标点差不多的位置，不管镜头怎么自动漂移都还是大致置中，
   // 不需要为了这个背景另外调一套摄影机参数。半径加倍之后原本 +14 的垫高量
@@ -531,7 +778,7 @@ function init() {
   const BACKDROP_BY_SECTION = {
     hero: 'mountain',
     about: 'city',
-    experience: 'none',
+    experience: 'city',
     projects: 'globe',
     contact: 'mountain',
   };
@@ -594,8 +841,7 @@ function init() {
 
     particles.material.opacity = 0.5 * Math.max(mountainMix, cityMix, globeMix);
 
-    city.userData.buildingMats.forEach((m) => { m.opacity = cityMix * 0.92; });
-    city.userData.windowMat.opacity = cityMix * Math.min(1, cityMix * 1.4);
+    cityShader.uniforms.uOpacity.value = cityMix;
 
     const [globeCoreMat, globeWireMat] = globe.userData.fadeMats;
     globeCoreMat.opacity = globeMix * 0.95;
@@ -622,6 +868,7 @@ function init() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    cityShader.uniforms.iResolution.value.set(renderer.domElement.width, renderer.domElement.height, 1);
   });
 
   /* ---------------- 主循环 ---------------- */
@@ -639,6 +886,15 @@ function init() {
     updateGlobeMarkers();
     updateFade();
 
+    cityShader.uniforms.iTime.value += dt;
+
+    // 城市 shader 用独立场景/正交相机先画一层当背景，主场景（山脉/河流/地球）
+    // 不清除画布地叠上去，透明处才会露出下面的城市背景；cityMix 是 0 时直接跳过
+    // 这个 raymarching pass，省一份效能
+    renderer.clear();
+    if (cityShader.uniforms.uOpacity.value > 0.01) {
+      renderer.render(cityShader.shaderScene, cityShader.shaderCamera);
+    }
     renderer.render(scene, camera);
   }
   animate();

@@ -198,17 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Experience 区块是白底反转配色，白色游标在上面会消失，捲到那一区时切换成深色游标
-  const experienceEl = document.getElementById('experience');
-  if (experienceEl) {
-    const lightSectionObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        document.body.classList.toggle('is-light-section', entry.intersectionRatio >= 0.35);
-      });
-    }, { threshold: [0, .35, 1] });
-    lightSectionObserver.observe(experienceEl);
-  }
-
   /* ---------------- 語言切換 ---------------- */
   const langToggle = document.getElementById('langToggle');
 

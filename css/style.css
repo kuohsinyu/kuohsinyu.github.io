@@ -8,9 +8,6 @@
   --glow-soft: rgba(255, 255, 255, 0.18);
   --accent:    #ffffff;
 
-  --exp-bg:    #f3f6f3;
-  --exp-ink:   #0a2e1c;
-
   --font-mono: 'JetBrains Mono', monospace;
   --font-display: 'Inter', 'Franklin Gothic Medium', 'Arial Narrow', sans-serif;
 }
@@ -558,74 +555,6 @@ body::before{
   display: block;
 }
 
-/* ============================================================
-   EXPERIENCE 反转配色：白底绿字，这一区不放 3D 地图背景
-============================================================ */
-#experience{
-  position: relative;
-  /* 跟前后深色区块之间不要硬切，上下各留一段绿到白／白到绿的渐层 */
-  background: linear-gradient(
-    to bottom,
-    var(--bg-deep) 0,
-    var(--exp-bg) 240px,
-    var(--exp-bg) calc(100% - 240px),
-    var(--bg-deep) 100%
-  );
-  color: var(--exp-ink);
-}
-
-#experience .section-tag{ color: rgba(10, 46, 28, .55); }
-#experience .section-title{ color: var(--exp-ink); }
-#experience .section-hint{ color: rgba(10, 46, 28, .45); }
-
-#experience .exp-card{
-  border-color: rgba(10, 46, 28, .18);
-  background: rgba(10, 46, 28, .03);
-}
-
-#experience .exp-card:hover,
-#experience .exp-card:focus-within{
-  border-color: rgba(10, 46, 28, .5);
-  background: rgba(10, 46, 28, .06);
-}
-
-#experience .exp-card:focus-visible{
-  outline-color: rgba(10, 46, 28, .4);
-}
-
-#experience .exp-card-toggle{ background: rgba(10, 46, 28, .4); }
-
-#experience .exp-card:hover .exp-card-toggle,
-#experience .exp-card:focus-within .exp-card-toggle{
-  background: var(--exp-ink);
-  box-shadow: 0 0 10px rgba(10, 46, 28, .4);
-}
-
-#experience .exp-card-head h3{ color: var(--exp-ink); }
-#experience .exp-card-org{ color: rgba(10, 46, 28, .6); }
-#experience .exp-card-date{ color: rgba(10, 46, 28, .45); }
-#experience .exp-card-text p{ color: rgba(10, 46, 28, .7); }
-#experience .exp-card-text li{ color: rgba(10, 46, 28, .75); }
-#experience .exp-card-text li::before{ color: rgba(10, 46, 28, .45); }
-#experience .exp-card-text li strong{ color: var(--exp-ink); }
-
-#experience .exp-photo{ border-color: rgba(10, 46, 28, .35); }
-#experience .exp-photo span{ color: rgba(10, 46, 28, .45); }
-#experience .exp-photo.has-img{ border-color: rgba(10, 46, 28, .18); }
-
-/* 白底之下白色游标会消失，滑到这一区时反转成深绿色 */
-body.is-light-section .cursor-dot{
-  background: var(--exp-ink);
-  box-shadow: 0 0 8px rgba(10, 46, 28, .5);
-}
-
-body.is-light-section .cursor-ring{
-  border-color: rgba(10, 46, 28, .45);
-}
-
-body.is-light-section .cursor-ring.is-active{
-  border-color: rgba(10, 46, 28, .9);
-}
 
 /* CONTACT */
 .contact-link{
