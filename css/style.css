@@ -248,25 +248,29 @@ body::before{
   50%{ transform: translateY(-5px); }
 }
 
-/* About Me 右侧两张照片，取代原本的 "YOUR PHOTO HERE" 占位框 */
+/* About Me 右侧两张照片，取代原本的 "YOUR PHOTO HERE" 占位框。
+   固定尺寸、不换行，就是简单的一左一右两张小照片（面积大约缩小到原本的十分之一）*/
 .about-photos{
   display: flex;
-  gap: 18px;
-  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  gap: 12px;
+  width: 152px;
 }
 
 .about-photo{
   position: relative;
-  width: 190px;
-  height: 260px;
-  border-radius: 14px;
+  flex: 0 0 auto;
+  width: 60px;
+  height: 82px;
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .18);
   transition: transform .4s ease, box-shadow .4s ease;
 }
 
 .about-photo:nth-child(1){ transform: rotate(-3deg); }
-.about-photo:nth-child(2){ transform: rotate(3deg); margin-top: 26px; }
+.about-photo:nth-child(2){ transform: rotate(3deg); margin-top: 8px; }
 
 .about-photo img{
   width: 100%;
@@ -275,7 +279,9 @@ body::before{
   display: block;
 }
 
-.about-photo:hover{
+/* 加上 .about-photos 祖先限定选择器，跟下面 nth-child 的 rotate 规则比specificity
+   赢得毫无悬念，不需要靠「写在后面」这种脆弱的排序去赢过 tie-break */
+.about-photos .about-photo:hover{
   transform: scale(2);
   z-index: 20;
   box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
@@ -594,8 +600,10 @@ body::before{
 }
 
 /* 滑过单张照片时放大到两倍，离开时用同一段 transition 缓缓缩回去，
-   而不是瞬间变大瞬间变小；z-index 拉高才不会被旁边的照片盖住 */
-.exp-photo.has-img:hover{
+   而不是瞬间变大瞬间变小；z-index 拉高才不会被旁边的照片盖住。
+   前面加 .exp-card 祖先限定，specificity 比 `.exp-card:hover .exp-photo` 的
+   reveal 规则高一截，赢得毫无悬念，不用再靠「写在后面」这种脆弱的排序去 tie-break */
+.exp-card .exp-photo.has-img:hover{
   transform: scale(2);
   z-index: 20;
   box-shadow: 0 16px 46px rgba(0, 0, 0, .55);
