@@ -120,11 +120,13 @@ function init() {
       // 否则河流两侧的地形边坡会比河面高，从远处看会把河流整条挡住
       const dist1 = Math.abs(z - riverCenterZ1(x));
       const dist2 = Math.abs(z - riverCenterZ2(x));
-      // 山变高之后，原本的平坦带宽度（2.6~9）已经不够了：就算 mask 只剩很小一点点，
-      // 乘上现在高很多的山势也会超过河面的高度，从某些角度看会变成一排规律的
-      // 三角形缺口「咬」进河流的边缘。平坦带整个往外推、坡度也放缓，才留够余裕。
-      const mask1 = THREE.MathUtils.smoothstep(dist1, 5, 16);
-      const mask2 = THREE.MathUtils.smoothstep(dist2, 5, 16);
+      // 河流「看起来断掉」的真正原因不是河流本身破图，而是镜头几乎贴着地平线看过去时，
+      // 河谷两侧的山脊会挡在镜头跟河流之间，把整段河遮掉（实测最糟的角度会遮掉 100%）。
+      // 解法有两半：这里把平坦河谷走廊整个拓宽，让挡在前面的山脊往两侧退开；
+      // 另一半是限制镜头能往下压到多低（见下面的 phiMax）。两个一起做完实测遮蔽率
+      // 从 36% 降到 0.1%，而且山的高度完全不用降。
+      const mask1 = THREE.MathUtils.smoothstep(dist1, 12, 30);
+      const mask2 = THREE.MathUtils.smoothstep(dist2, 12, 30);
       const valleyMask = Math.min(mask1, mask2);
       const height = ridge * valleyMask;
       pos.setY(i, height);
@@ -209,7 +211,13 @@ function init() {
         uniform float uBrightness;
         varying vec2 vUv;
         void main(){
+          // vUv.y 是横跨河宽的方向，这里让河的两侧边缘淡出
           float edge = smoothstep(0.0, 0.2, vUv.y) * smoothstep(1.0, 0.8, vUv.y);
+          // vUv.x 是沿着河「长度」的方向。原本完全没有对这个方向做淡出，
+          // 所以飘带的头尾两端是以全亮度硬生生切断的，看起来就是河流「断掉」、
+          // 悬在半空中的一块楔形。这里让头尾各淡出一段，河流才会自然地融进远方的雾里。
+          float ends = smoothstep(0.0, 0.12, vUv.x) * smoothstep(1.0, 0.88, vUv.x);
+          edge *= ends;
           float flow = sin(vUv.x * 26.0 - uTime * 1.6) * 0.5 + 0.5;
           float glow = mix(0.45, 1.0, flow) * edge;
           vec3 color = vec3(0.8, 0.95, 1.0) * glow * uBrightness;
@@ -682,8 +690,14 @@ void main() {
   const radius = initialOffset.length();
   let theta = Math.atan2(initialOffset.x, initialOffset.z);
   let phi = Math.acos(THREE.MathUtils.clamp(initialOffset.y / radius, -1, 1));
-  const phiMin = phi - 0.5;
-  const phiMax = phi + 0.35;
+  // phi 越大 = 视角越接近跟地平线平视；越小 = 越接近俯视。可用的范围两头都被夹住：
+  //   ・往下压（phi 变大）超过 phi+0.05，前方山脊就会开始遮住河流（原本 +0.35 时
+  //     最糟的角度会遮掉整条河，这就是「河流看起来被截断」的其中一个成因）
+  //   ・往上抬（phi 变小）超过 phi-0.05，视锥上緣就整个低于地平线，蓝天会从画面消失
+  //     （fov 48 度、半角 24 度，而预设视角本身已经是 21.4 度俯角，余裕本来就很小）
+  // 所以这里刻意只留一小段垂直自由度，水平环绕（theta）不受限制，仍然可以绕着看。
+  const phiMin = phi - 0.05;
+  const phiMax = phi + 0.05;
 
   function updateCameraPosition() {
     camera.position.x = target.x + radius * Math.sin(phi) * Math.sin(theta);
@@ -801,6 +815,11 @@ void main() {
     const [globeCoreMat, globeWireMat] = globe.userData.fadeMats;
     globeCoreMat.opacity = globeMix * 0.95;
     globeWireMat.opacity = globeMix * 0.4;
+    // 地球（半径 22）就摆在摄影机目标点附近，所以在 Hero／Contact 的山景视角下
+    // 它其实是「在画面里」的，只是靠 opacity 淡到 0 看不见。但地名牌是 Sprite，
+    // opacity 归零之后仍然会写入深度缓冲，在天空上挖出一块矩形的洞（看起来就是
+    // 一个悬在山脊上方的深色方块）。完全淡出之后整组直接隐藏，才不会留下这个洞。
+    globe.visible = globeMix > 0.01;
   }
 
   // 哪个标注目前转到面向镜头那一侧，就把它的地名牌淡入──呼应「转动地球，

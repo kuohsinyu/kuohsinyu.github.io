@@ -373,20 +373,27 @@ body::before{
 #experience .exp-grid{ grid-template-columns: repeat(2, 1fr); }
 #projects .exp-grid{ grid-template-columns: repeat(2, 1fr); }
 
+/* 卡片底色原本用的是半透明「白」，叠在后面那支很亮的城市 shader 上之后，
+   底色被衬得很浅，白字压在上面几乎看不出对比。改成半透明的深色底
+   ＋ backdrop-filter 把背后的动画压暗模糊，白字才吃得住对比。 */
 .exp-card{
   position: relative;
-  border: 1px solid rgba(255, 255, 255, .18);
+  border: 1px solid rgba(255, 255, 255, .22);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.324);
+  background: rgba(4, 18, 11, .58);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   padding: 26px 26px 24px;
   transition: border-color .4s ease, background .4s ease, color .3s ease;
 }
 
 .exp-card:hover,
 .exp-card:focus-within{
-  border-color: rgba(255, 255, 255, .55);
-  /* 提高懸停時的白色不透明度，讓卡片底色更明顯 */
-  background: rgba(255, 255, 255, .18);
+  border-color: rgba(255, 255, 255, .6);
+  /* 展开时把底色再压暗一点：这时候文字最多，最需要对比 */
+  background: rgba(4, 18, 11, .82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .exp-card:focus-visible{
@@ -415,7 +422,7 @@ body::before{
 .exp-card-head h3{
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   line-height: 1.35;
   color: #ffffff;
   margin: 0 0 8px;
@@ -426,9 +433,9 @@ body::before{
 .exp-card-org{
   display: block;
   font-family: var(--font-mono);
-  font-size: .92rem;
+  font-size: 1rem;
   letter-spacing: .3px;
-  color: rgba(255, 255, 255, .8);
+  color: rgba(255, 255, 255, .92);
   margin-bottom: 6px;
   transition: color .3s ease;
 }
@@ -436,9 +443,9 @@ body::before{
 .exp-card-date{
   display: block;
   font-family: var(--font-mono);
-  font-size: .85rem;
+  font-size: .92rem;
   letter-spacing: 1px;
-  color: rgba(255, 255, 255, .62);
+  color: rgba(255, 255, 255, .78);
   transition: color .3s ease;
 }
 
@@ -449,9 +456,9 @@ body::before{
 
 .exp-card-text p{
   font-family: var(--font-mono);
-  font-size: .95rem;
+  font-size: 1.02rem;
   line-height: 1.75;
-  color: rgba(255, 255, 255, .85);
+  color: rgba(255, 255, 255, .95);
   margin: 0 0 14px;
   transition: color .3s ease;
 }
@@ -473,22 +480,20 @@ body::before{
   gap: 12px;
 }
 
-/* 修正：原本是 .1rem，字小到幾乎看不見，這裡是打字打錯，改回跟內文段落
-   同一個量級（.92rem），並把顏色一起提亮 */
 .exp-card-text li{
   position: relative;
   padding-left: 18px;
   font-family: var(--font-mono);
-  font-size: .92rem;
+  font-size: 1rem;
   line-height: 1.7;
-  color: rgba(255, 255, 255, .85);
+  color: rgba(255, 255, 255, .95);
 }
 
 .exp-card-text li::before{
   content: "—";
   position: absolute;
   left: 0;
-  color: rgba(255, 255, 255, .4);
+  color: rgba(255, 255, 255, .6);
 }
 
 .exp-card-text li strong{ color: #ffffff; font-weight: 600; }
