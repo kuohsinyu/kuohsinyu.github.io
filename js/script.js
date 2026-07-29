@@ -1,7 +1,6 @@
 // ============================================================
 // 1) 自訂游標：圓點即時跟隨、圓圈帶延遲地追著跑
 // 2) 中英文雙語切換
-// 3) Landing page 點矩陣互動
 // （Experience / Project & Program 的卡片展開純靠 CSS :hover / :focus-within，
 //   不需要額外的 JS）
 // ============================================================
@@ -153,8 +152,6 @@ const TRANSLATIONS = {
   },
 };
 
-const SKILL_KEYS = ['skill-photoshop', 'skill-illustrator', 'skill-canva', 'skill-python', 'skill-social', 'skill-data', 'skill-bilingual'];
-
 document.addEventListener('DOMContentLoaded', () => {
   /* ---------------- 自訂游標 ---------------- */
   const isTouch = window.matchMedia('(pointer: coarse)').matches;
@@ -191,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- 語言切換 ---------------- */
   const langToggle = document.getElementById('langToggle');
-  const dotLabels = []; // 稍後在建立點矩陣時填入 {el, key}
 
   function applyLanguage(lang) {
     document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
@@ -199,9 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const key = el.dataset.i18n;
       const text = TRANSLATIONS[lang][key];
       if (text !== undefined) el.innerHTML = text;
-    });
-    dotLabels.forEach(({ el, key }) => {
-      el.textContent = TRANSLATIONS[lang][key];
     });
     if (langToggle) langToggle.textContent = lang === 'en' ? '中文' : 'EN';
     localStorage.setItem('site-lang', lang);
@@ -213,57 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
     langToggle.addEventListener('click', () => {
       currentLang = currentLang === 'en' ? 'zh' : 'en';
       applyLanguage(currentLang);
-    });
-  }
-
-  /* ---------------- Landing page 點矩陣 ---------------- */
-  const GRID_SIZE = 8;
-  const SKILL_INDICES = [5, 12, 27, 34, 41, 52, 60]; // 1-based 位置，落在 8x8 矩陣裡
-
-  const stage = document.getElementById('dotStage');
-  const matrix = document.getElementById('dotMatrix');
-  const hero = document.getElementById('hero');
-
-  if (stage && matrix && hero) {
-    const visited = new Set();
-    const keyByIndex = new Map(SKILL_INDICES.map((index, i) => [index, SKILL_KEYS[i]]));
-    const totalDots = GRID_SIZE * GRID_SIZE;
-
-    for (let i = 1; i <= totalDots; i++) {
-      const dot = document.createElement('span');
-      dot.className = 'dot';
-
-      const skillKey = keyByIndex.get(i);
-      if (skillKey) {
-        dot.classList.add('dot-skill');
-
-        const label = document.createElement('span');
-        label.className = 'dot-label';
-        label.textContent = TRANSLATIONS[currentLang][skillKey];
-        dot.appendChild(label);
-        dotLabels.push({ el: label, key: skillKey });
-
-        dot.addEventListener('mouseenter', () => {
-          dot.classList.add('is-active');
-          visited.add(skillKey);
-          if (visited.size === SKILL_KEYS.length) {
-            stage.classList.add('is-complete');
-          }
-          if (cursorRing) cursorRing.classList.add('is-active');
-        });
-        dot.addEventListener('mouseleave', () => {
-          dot.classList.remove('is-active');
-          if (cursorRing) cursorRing.classList.remove('is-active');
-        });
-      }
-
-      matrix.appendChild(dot);
-    }
-
-    hero.addEventListener('mouseleave', () => {
-      stage.classList.remove('is-complete');
-      visited.clear();
-      matrix.querySelectorAll('.dot-skill.is-active').forEach((dot) => dot.classList.remove('is-active'));
     });
   }
 
