@@ -1,55 +1,288 @@
 // ============================================================
-// Landing page 點矩陣互動：
-// 滑過技能點會顯示技能名稱，全部滑過一輪後矩陣淡出、
-// 出現點陣雲霄飛車動畫；滑鼠離開 landing page 就整個重置。
+// 1) 中英文雙語切換
+// 2) Landing page 點矩陣互動
+// 3) Experience 全螢幕聚光燈卡片
 // ============================================================
 
+const TRANSLATIONS = {
+  en: {
+    'nav-logo': 'Welcome to my space',
+    'nav-work': 'LANDING PAGE',
+    'nav-about': 'ABOUT',
+    'nav-experience': 'EXPERIENCE',
+    'nav-contact': 'CONTACT',
+
+    'hero-line1': "Hi, I'm",
+    'scroll-cue': 'SCROLL',
+
+    'skill-photoshop': 'Photoshop',
+    'skill-illustrator': 'Illustrator',
+    'skill-canva': 'Canva',
+    'skill-python': 'Python',
+    'skill-social': 'Social Media',
+    'skill-data': 'Data Analysis',
+    'skill-bilingual': 'Bilingual',
+
+    'about-tag': '01 — ABOUT',
+    'about-title': 'About Me',
+    'about-p1': "Hi, I'm <strong>Syndrea</strong> — a bilingual marketing student moving between Taiwan and Germany, currently exploring the space where data, design, and storytelling meet. I like turning raw numbers into visuals people actually want to look at, and turning ideas into content that travels smoothly across platforms and languages.",
+    'about-p2': "Outside of coursework, I've managed social media for a concert band, built a sentiment-analysis pipeline out of curiosity, and picked up interpreting work along the way — always looking for the next thing to learn.",
+    'about-photo': 'YOUR PHOTO HERE',
+
+    'exp-tag': '02 — EXPERIENCE',
+    'exp-title': 'Experience',
+    'exp-hint': 'Hover (or tap) a card to see the details',
+
+    'fiabci-title': 'Media Liaison &amp; Liaison Interpreter',
+    'fiabci-org': '76th FIABCI World Congress — Vienna, Austria',
+    'fiabci-date': 'May 2026 · Freelance',
+    'fiabci-bullet1': 'Coordinated schedules and on-site support for Taiwan media delegations at an international congress, working across corporate, government, and press stakeholders.',
+    'fiabci-bullet2': 'Delivered real-time English–Mandarin interpretation and prepared written materials for accurate press coverage.',
+
+    'ntnu-title': 'Public Relations &amp; Social Media Lead',
+    'ntnu-org': 'NTNU Wind Band — Taiwan',
+    'ntnu-date': 'Jul 2024 – Aug 2025',
+    'ntnu-bullet1': 'Coordinated with corporate vendors to secure NT$350,000 in sponsorships, managing the associated documentation, agreements, and follow-up communications — directly transferable to HR documentation and vendor-facing administrative tasks.',
+    'ntnu-bullet2': 'Maintained an ongoing content calendar and promotional planning system, reflecting comfort with routine, structured record-keeping and multi-task management under deadlines.',
+
+    'sentiment-title': 'YouTube Chinese Sentiment Analyzer',
+    'sentiment-org': 'Independent Project (BERT NLP Pipeline) — Taiwan',
+    'sentiment-date': '2024',
+    'sentiment-bullet1': 'Built an end-to-end NLP pipeline — data collection, preprocessing, keyword extraction, and sentiment classification — then organized results into clear, structured reports.',
+    'sentiment-bullet2': 'Demonstrates precision and comfort maintaining structured, accurate data — directly relevant to keeping HR systems and employee records accurate and up to date.',
+
+    'concordia-title': 'France CONCORDIA International Volunteer Program',
+    'concordia-org': 'Concordia Association — France',
+    'concordia-desc': 'Traveled independently to France to collaborate closely with young leaders from ten countries around the world, working on local town hall restoration, forest conservation, and community public education.',
+    'concordia-bullet1': '<strong>International Public Outreach &amp; Education:</strong> Led multicultural education initiatives for children in rural France, bridging language barriers and successfully using Taiwanese music as a means of cultural exchange.',
+    'concordia-bullet2': '<strong>Cross-Border Advocacy &amp; Communication:</strong> Co-organized a workshop on climate change and environmental sustainability, engaging deeply with volunteers from Belgium, Serbia, and other countries on international geopolitical and cultural perspectives.',
+
+    'uae-title': 'Taiwan–UAE Youth Exchange Program',
+    'uae-org': 'Selected as Taiwan Youth Representative — United Arab Emirates',
+    'uae-desc': "Engaged with the core of the Middle East's technology and business sectors through a cross-disciplinary international exchange centered on leadership, entrepreneurship, and environmental sustainability.",
+    'uae-bullet1': '<strong>Sustainability Project Practice:</strong> Took part in local environmental sustainability initiatives in the UAE, including hands-on tree-planting projects, cross-national youth forums, and extreme climate adaptation experiences.',
+    'uae-bullet2': '<strong>Cross-Disciplinary Business Thinking:</strong> Participated in entrepreneurship workshops and visits to leading local museums, integrating technology, human resources, and ESG (Environmental, Social, and Governance) thinking.',
+    'exp-source': 'Source: NTNU News →',
+
+    'photo-1': 'PHOTO 1',
+    'photo-2': 'PHOTO 2',
+    'photo-3': 'PHOTO 3',
+
+    'contact-tag': '03 — CONTACT',
+    'contact-title': "Let's Talk",
+    'contact-text': 'Open to working student roles, collaborations, or just a good conversation about design and data.',
+  },
+  zh: {
+    'nav-logo': '歡迎來到我的空間',
+    'nav-work': '首頁',
+    'nav-about': '關於我',
+    'nav-experience': '經歷',
+    'nav-contact': '聯絡',
+
+    'hero-line1': '嗨，我是',
+    'scroll-cue': '向下滑動',
+
+    'skill-photoshop': 'Photoshop',
+    'skill-illustrator': 'Illustrator',
+    'skill-canva': 'Canva',
+    'skill-python': 'Python',
+    'skill-social': '社群媒體',
+    'skill-data': '數據分析',
+    'skill-bilingual': '雙語能力',
+
+    'about-tag': '01 — 關於我',
+    'about-title': '關於我',
+    'about-p1': '嗨，我是 <strong>Syndrea</strong>——一位穿梭於台灣與德國之間的雙語行銷學生，目前正探索數據、設計與敘事交會的領域。我喜歡把生硬的數字轉化成大家真正想看的視覺內容，也喜歡把想法轉化成能跨平台、跨語言流暢傳遞的內容。',
+    'about-p2': '課堂之外，我曾為管樂團經營社群媒體、出於好奇心打造情感分析系統，也接觸過口譯工作——始終在尋找下一個值得學習的新事物。',
+    'about-photo': '放上你的照片',
+
+    'exp-tag': '02 — 經歷',
+    'exp-title': '經歷',
+    'exp-hint': '滑過（或點擊）卡片查看詳情',
+
+    'fiabci-title': '媒體聯絡與隨行口譯',
+    'fiabci-org': '第76屆國際不動產聯盟世界大會 — 奧地利維也納',
+    'fiabci-date': '2026年5月・自由接案',
+    'fiabci-bullet1': '於國際會議中協調台灣媒體代表團的行程與現場支援，橫跨企業、政府與媒體等多方利害關係人。',
+    'fiabci-bullet2': '提供英語與中文即時口譯，並準備書面資料以確保媒體報導的準確性。',
+
+    'ntnu-title': '公共關係暨社群媒體負責人',
+    'ntnu-org': '師大管樂團 — 台灣',
+    'ntnu-date': '2024年7月 – 2025年8月',
+    'ntnu-bullet1': '與企業廠商協調並成功爭取新台幣35萬元贊助，負責相關文件、合約與後續溝通——此經驗可直接轉化為人資文件處理與廠商對接的行政能力。',
+    'ntnu-bullet2': '持續維護內容行事曆與宣傳規劃系統，展現在期限壓力下進行結構化紀錄與多工管理的能力。',
+
+    'sentiment-title': 'YouTube 中文情感分析器',
+    'sentiment-org': '獨立專案（BERT 自然語言處理流程）— 台灣',
+    'sentiment-date': '2024年',
+    'sentiment-bullet1': '建置端到端自然語言處理流程——資料蒐集、前處理、關鍵字擷取與情感分類——並將結果整理成清晰、結構化的報告。',
+    'sentiment-bullet2': '展現在維護結構化、精確資料上的細心與熟練，與確保人資系統及員工紀錄準確更新高度相關。',
+
+    'concordia-title': '法國 CONCORDIA 國際志工計畫',
+    'concordia-org': 'Concordia 協會 — 法國',
+    'concordia-desc': '獨自前往法國，與來自全球十個國家的青年領袖深度協作，負責地方市政廳修復、森林保育與社區公共教育。',
+    'concordia-bullet1': '<strong>國際公共宣導與教育：</strong>主導面向法國偏鄉孩童的多元文化教育，跨越語言障礙，成功運用臺灣音樂進行交流。',
+    'concordia-bullet2': '<strong>跨國倡議與溝通：</strong>共同籌辦氣候變遷與環境永續申論工作營，與比利時、塞爾維亞等多國志工深度碰撞國際地緣政治與文化觀點。',
+
+    'uae-title': '臺灣－阿拉伯聯合大公國（UAE）青年交流計畫',
+    'uae-org': '獲選台灣代表青年 — 阿拉伯聯合大公國',
+    'uae-desc': '深入中東科技與商業核心，以領袖能力、企業家精神與環境永續為核心主軸進行跨領域國際交流。',
+    'uae-bullet1': '<strong>永續專案實踐：</strong>深度參與阿聯酋當地的環境永續倡議，包含實地綠色植樹計畫、跨國青年座談與極端氣候適應體驗。',
+    'uae-bullet2': '<strong>跨領域商務思維：</strong>對接企業家精神研習與當地頂尖博物館參訪，將科技、人力資源與永續發展（ESG）思維深度結合。',
+    'exp-source': '資料來源：師大新聞 →',
+
+    'photo-1': '照片 1',
+    'photo-2': '照片 2',
+    'photo-3': '照片 3',
+
+    'contact-tag': '03 — 聯絡',
+    'contact-title': '聊聊吧',
+    'contact-text': '歡迎工讀生職缺、合作機會，或單純想聊聊設計與數據的想法。',
+  },
+};
+
+const SKILL_KEYS = ['skill-photoshop', 'skill-illustrator', 'skill-canva', 'skill-python', 'skill-social', 'skill-data', 'skill-bilingual'];
+
 document.addEventListener('DOMContentLoaded', () => {
-  const SKILLS = ['Photoshop', 'Illustrator', 'Canva', 'Python', 'Social Media', 'Data Analysis', 'Bilingual'];
+  /* ---------------- 語言切換 ---------------- */
+  const langToggle = document.getElementById('langToggle');
+  const dotLabels = []; // 稍後在建立點矩陣時填入 {el, key}
+
+  function applyLanguage(lang) {
+    document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = el.dataset.i18n;
+      const text = TRANSLATIONS[lang][key];
+      if (text !== undefined) el.innerHTML = text;
+    });
+    dotLabels.forEach(({ el, key }) => {
+      el.textContent = TRANSLATIONS[lang][key];
+    });
+    if (langToggle) langToggle.textContent = lang === 'en' ? '中文' : 'EN';
+    localStorage.setItem('site-lang', lang);
+  }
+
+  let currentLang = localStorage.getItem('site-lang') === 'zh' ? 'zh' : 'en';
+
+  if (langToggle) {
+    langToggle.addEventListener('click', () => {
+      currentLang = currentLang === 'en' ? 'zh' : 'en';
+      applyLanguage(currentLang);
+    });
+  }
+
+  /* ---------------- Landing page 點矩陣 ---------------- */
   const GRID_SIZE = 8;
   const SKILL_INDICES = [5, 12, 27, 34, 41, 52, 60]; // 1-based 位置，落在 8x8 矩陣裡
 
   const stage = document.getElementById('dotStage');
   const matrix = document.getElementById('dotMatrix');
   const hero = document.getElementById('hero');
-  if (!stage || !matrix || !hero) return;
 
-  const visited = new Set();
-  const skillByIndex = new Map(SKILL_INDICES.map((index, i) => [index, SKILLS[i]]));
-  const totalDots = GRID_SIZE * GRID_SIZE;
+  if (stage && matrix && hero) {
+    const visited = new Set();
+    const keyByIndex = new Map(SKILL_INDICES.map((index, i) => [index, SKILL_KEYS[i]]));
+    const totalDots = GRID_SIZE * GRID_SIZE;
 
-  for (let i = 1; i <= totalDots; i++) {
-    const dot = document.createElement('span');
-    dot.className = 'dot';
+    for (let i = 1; i <= totalDots; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'dot';
 
-    const skill = skillByIndex.get(i);
-    if (skill) {
-      dot.classList.add('dot-skill');
-      dot.dataset.skill = skill;
+      const skillKey = keyByIndex.get(i);
+      if (skillKey) {
+        dot.classList.add('dot-skill');
 
-      const label = document.createElement('span');
-      label.className = 'dot-label';
-      label.textContent = skill;
-      dot.appendChild(label);
+        const label = document.createElement('span');
+        label.className = 'dot-label';
+        label.textContent = TRANSLATIONS[currentLang][skillKey];
+        dot.appendChild(label);
+        dotLabels.push({ el: label, key: skillKey });
 
-      dot.addEventListener('mouseenter', () => {
-        dot.classList.add('is-active');
-        visited.add(skill);
-        if (visited.size === SKILLS.length) {
-          stage.classList.add('is-complete');
-        }
-      });
-      dot.addEventListener('mouseleave', () => {
-        dot.classList.remove('is-active');
-      });
+        dot.addEventListener('mouseenter', () => {
+          dot.classList.add('is-active');
+          visited.add(skillKey);
+          if (visited.size === SKILL_KEYS.length) {
+            stage.classList.add('is-complete');
+          }
+        });
+        dot.addEventListener('mouseleave', () => {
+          dot.classList.remove('is-active');
+        });
+      }
+
+      matrix.appendChild(dot);
     }
 
-    matrix.appendChild(dot);
+    hero.addEventListener('mouseleave', () => {
+      stage.classList.remove('is-complete');
+      visited.clear();
+      matrix.querySelectorAll('.dot-skill.is-active').forEach((dot) => dot.classList.remove('is-active'));
+    });
   }
 
-  hero.addEventListener('mouseleave', () => {
-    stage.classList.remove('is-complete');
-    visited.clear();
-    matrix.querySelectorAll('.dot-skill.is-active').forEach((dot) => dot.classList.remove('is-active'));
-  });
+  applyLanguage(currentLang);
+
+  /* ---------------- Experience 全萤幕聚光灯 ---------------- */
+  const expStage = document.getElementById('expStage');
+  const expSpotlight = document.getElementById('expSpotlight');
+  const nav = document.querySelector('.nav');
+
+  if (expStage && expSpotlight) {
+    const NAV_HEIGHT = 96;
+
+    function openExperience(id) {
+      expStage.classList.add('is-open');
+      expSpotlight.dataset.active = id;
+    }
+
+    function closeExperience() {
+      expStage.classList.remove('is-open');
+      delete expSpotlight.dataset.active;
+    }
+
+    // hover-intent：鼠标移动经过卡片前往别处时不该抢先打开它，只有「停下来」
+    // 停留满一段时间才算数——用 mousemove 持续重设计时器，路过时事件不会停，
+    // 只有真的停在某张卡片上才会让计时器归零并打开
+    const HOVER_INTENT_DELAY = 120;
+    let intentTimer = null;
+    let intentTarget = null;
+
+    function scheduleOpen(el) {
+      intentTarget = el;
+      clearTimeout(intentTimer);
+      intentTimer = setTimeout(() => {
+        if (intentTarget === el) openExperience(el.dataset.exp);
+      }, HOVER_INTENT_DELAY);
+    }
+
+    const triggers = expStage.querySelectorAll('.exp-card-mini, .exp-tab');
+    triggers.forEach((el) => {
+      el.addEventListener('mousemove', () => scheduleOpen(el));
+      el.addEventListener('mouseleave', () => {
+        if (intentTarget === el) {
+          clearTimeout(intentTimer);
+          intentTarget = null;
+        }
+      });
+      el.addEventListener('focus', () => {
+        clearTimeout(intentTimer);
+        intentTarget = el;
+        openExperience(el.dataset.exp);
+      });
+    });
+
+    // 滑到顶部导航或整个视窗外面时，视为离开体验区域，重置回矩阵/卡片状态
+    document.addEventListener('mousemove', (e) => {
+      if (expStage.classList.contains('is-open') && e.clientY < NAV_HEIGHT) {
+        closeExperience();
+      }
+    });
+    document.addEventListener('mouseleave', closeExperience);
+    if (nav) nav.addEventListener('mouseenter', closeExperience);
+
+    // 键盘操作：焦点离开整个 stage 时重置
+    expStage.addEventListener('focusout', (e) => {
+      if (!expStage.contains(e.relatedTarget)) closeExperience();
+    });
+  }
 });

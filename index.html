@@ -15,12 +15,13 @@
 <body>
 
 <header class="nav">
-  <a href="#hero" class="nav-logo">Welcome to my space</a>
+  <a href="#hero" class="nav-logo" data-i18n="nav-logo">Welcome to my space</a>
   <nav class="nav-links">
-    <a href="#hero">LANDING PAGE</a>
-    <a href="#about">ABOUT</a>
-    <a href="#experience">EXPERIENCE</a>
-    <a href="#contact">CONTACT</a>
+    <a href="#hero" data-i18n="nav-work">LANDING PAGE</a>
+    <a href="#about" data-i18n="nav-about">ABOUT</a>
+    <a href="#experience" data-i18n="nav-experience">EXPERIENCE</a>
+    <a href="#contact" data-i18n="nav-contact">CONTACT</a>
+    <button type="button" id="langToggle" class="lang-toggle">中文</button>
   </nav>
 </header>
 
@@ -28,18 +29,18 @@
 
   <section id="hero" class="hero">
     <h1 class="hero-title">
-      <span class="line-text">Hi, I'm</span>
+      <span class="line-text" data-i18n="hero-line1">Hi, I'm</span>
       <span class="line-space">
         <span class="line-text">Syndrea Kuo</span>
         <span class="hover-dot" aria-hidden="true"></span>
         <span class="skills-flow" aria-hidden="true">
-          <span class="skill-word" style="--i:0"><span class="skill-word-inner">Photoshop</span></span>
-          <span class="skill-word" style="--i:1"><span class="skill-word-inner">Illustrator</span></span>
-          <span class="skill-word" style="--i:2"><span class="skill-word-inner">Canva</span></span>
-          <span class="skill-word" style="--i:3"><span class="skill-word-inner">Python</span></span>
-          <span class="skill-word" style="--i:4"><span class="skill-word-inner">Social Media</span></span>
-          <span class="skill-word" style="--i:5"><span class="skill-word-inner">Data Analysis</span></span>
-          <span class="skill-word" style="--i:6"><span class="skill-word-inner">Bilingual</span></span>
+          <span class="skill-word" style="--i:0"><span class="skill-word-inner" data-i18n="skill-photoshop">Photoshop</span></span>
+          <span class="skill-word" style="--i:1"><span class="skill-word-inner" data-i18n="skill-illustrator">Illustrator</span></span>
+          <span class="skill-word" style="--i:2"><span class="skill-word-inner" data-i18n="skill-canva">Canva</span></span>
+          <span class="skill-word" style="--i:3"><span class="skill-word-inner" data-i18n="skill-python">Python</span></span>
+          <span class="skill-word" style="--i:4"><span class="skill-word-inner" data-i18n="skill-social">Social Media</span></span>
+          <span class="skill-word" style="--i:5"><span class="skill-word-inner" data-i18n="skill-data">Data Analysis</span></span>
+          <span class="skill-word" style="--i:6"><span class="skill-word-inner" data-i18n="skill-bilingual">Bilingual</span></span>
         </span>
       </span>
     </h1>
@@ -58,152 +59,186 @@
 
     <a href="#about" class="scroll-cue" aria-label="Scroll down">
       <span class="scroll-cue-line"></span>
-      SCROLL
+      <span data-i18n="scroll-cue">SCROLL</span>
     </a>
   </section>
 
   <section id="about" class="section section-wide">
-    <span class="section-tag">01 — ABOUT</span>
-    <h2 class="section-title">About Me</h2>
+    <span class="section-tag" data-i18n="about-tag">01 — ABOUT</span>
+    <h2 class="section-title" data-i18n="about-title">About Me</h2>
     <div class="about-layout">
       <div class="about-copy">
-        <p class="section-text">
+        <p class="section-text" data-i18n="about-p1">
           Hi, I'm <strong>Syndrea</strong> — a bilingual marketing student moving between Taiwan and Germany,
           currently exploring the space where data, design, and storytelling meet. I like turning raw numbers
           into visuals people actually want to look at, and turning ideas into content that travels smoothly
           across platforms and languages.
         </p>
-        <p class="section-text">
+        <p class="section-text" data-i18n="about-p2">
           Outside of coursework, I've managed social media for a concert band, built a sentiment-analysis
           pipeline out of curiosity, and picked up interpreting work along the way — always looking for the
           next thing to learn.
         </p>
       </div>
       <div class="photo-frame" aria-hidden="true">
-        <span>YOUR PHOTO HERE</span>
+        <span data-i18n="about-photo">YOUR PHOTO HERE</span>
       </div>
     </div>
   </section>
 
   <section id="experience" class="section section-wide">
-    <span class="section-tag">02 — EXPERIENCE</span>
-    <h2 class="section-title">Experience</h2>
-    <p class="section-hint">Hover (or tap) a card to see the details</p>
+    <span class="section-tag" data-i18n="exp-tag">02 — EXPERIENCE</span>
+    <h2 class="section-title" data-i18n="exp-title">Experience</h2>
+    <p class="section-hint" data-i18n="exp-hint">Hover (or tap) a card to see the details</p>
 
-    <div class="exp-grid">
+    <div class="exp-stage" id="expStage">
 
-      <article class="exp-card" tabindex="0">
-        <span class="exp-card-toggle" aria-hidden="true"></span>
-        <div class="exp-card-head">
-          <h3>Media Liaison &amp; Liaison Interpreter</h3>
-          <span class="exp-card-org">76th FIABCI World Congress — Vienna, Austria</span>
-          <span class="exp-card-date">May 2026 · Freelance</span>
-        </div>
-        <div class="exp-card-reveal">
-          <ul>
-            <li>Coordinated schedules and on-site support for Taiwan media delegations at an international congress, working across corporate, government, and press stakeholders.</li>
-            <li>Delivered real-time English–Mandarin interpretation and prepared written materials for accurate press coverage.</li>
-          </ul>
-          <div class="exp-photos">
-            <div class="exp-photo has-img"><img src="assets/img/fiabci-1.jpg" alt="FIABCI World Congress"></div>
-            <div class="exp-photo"><span>PHOTO 2</span></div>
-            <div class="exp-photo"><span>PHOTO 3</span></div>
+      <div class="exp-grid">
+        <article class="exp-card-mini" data-exp="fiabci" tabindex="0">
+          <h3 data-i18n="fiabci-title">Media Liaison &amp; Liaison Interpreter</h3>
+          <span class="exp-card-mini-org" data-i18n="fiabci-org">76th FIABCI World Congress — Vienna, Austria</span>
+          <span class="exp-card-mini-date" data-i18n="fiabci-date">May 2026 · Freelance</span>
+        </article>
+
+        <article class="exp-card-mini" data-exp="ntnu" tabindex="0">
+          <h3 data-i18n="ntnu-title">Public Relations &amp; Social Media Lead</h3>
+          <span class="exp-card-mini-org" data-i18n="ntnu-org">NTNU Wind Band — Taiwan</span>
+          <span class="exp-card-mini-date" data-i18n="ntnu-date">Jul 2024 – Aug 2025</span>
+        </article>
+
+        <article class="exp-card-mini" data-exp="sentiment" tabindex="0">
+          <h3 data-i18n="sentiment-title">YouTube Chinese Sentiment Analyzer</h3>
+          <span class="exp-card-mini-org" data-i18n="sentiment-org">Independent Project (BERT NLP Pipeline) — Taiwan</span>
+          <span class="exp-card-mini-date" data-i18n="sentiment-date">2024</span>
+        </article>
+      </div>
+
+      <div class="exp-grid exp-grid-secondary">
+        <article class="exp-card-mini" data-exp="concordia" tabindex="0">
+          <h3 data-i18n="concordia-title">France CONCORDIA International Volunteer Program</h3>
+          <span class="exp-card-mini-org" data-i18n="concordia-org">Concordia Association — France</span>
+        </article>
+
+        <article class="exp-card-mini" data-exp="uae" tabindex="0">
+          <h3 data-i18n="uae-title">Taiwan–UAE Youth Exchange Program</h3>
+          <span class="exp-card-mini-org" data-i18n="uae-org">Selected as Taiwan Youth Representative — United Arab Emirates</span>
+        </article>
+      </div>
+
+      <div class="exp-spotlight" id="expSpotlight">
+
+        <div class="exp-panel" data-exp="fiabci">
+          <div class="exp-panel-text">
+            <span class="exp-panel-org" data-i18n="fiabci-org">76th FIABCI World Congress — Vienna, Austria</span>
+            <h3 data-i18n="fiabci-title">Media Liaison &amp; Liaison Interpreter</h3>
+            <span class="exp-panel-date" data-i18n="fiabci-date">May 2026 · Freelance</span>
+            <ul>
+              <li data-i18n="fiabci-bullet1">Coordinated schedules and on-site support for Taiwan media delegations at an international congress, working across corporate, government, and press stakeholders.</li>
+              <li data-i18n="fiabci-bullet2">Delivered real-time English–Mandarin interpretation and prepared written materials for accurate press coverage.</li>
+            </ul>
+          </div>
+          <div class="exp-panel-photos">
+            <div class="exp-photo exp-photo-main has-img"><img src="assets/img/fiabci-1.jpg" alt="FIABCI World Congress"></div>
+            <div class="exp-photo-row">
+              <div class="exp-photo"><span data-i18n="photo-2">PHOTO 2</span></div>
+              <div class="exp-photo"><span data-i18n="photo-3">PHOTO 3</span></div>
+            </div>
           </div>
         </div>
-      </article>
 
-      <article class="exp-card" tabindex="0">
-        <span class="exp-card-toggle" aria-hidden="true"></span>
-        <div class="exp-card-head">
-          <h3>Public Relations &amp; Social Media Lead</h3>
-          <span class="exp-card-org">NTNU Wind Band — Taiwan</span>
-          <span class="exp-card-date">Jul 2024 – Aug 2025</span>
-        </div>
-        <div class="exp-card-reveal">
-          <ul>
-            <li>Coordinated with corporate vendors to secure NT$350,000 in sponsorships, managing the associated documentation, agreements, and follow-up communications — directly transferable to HR documentation and vendor-facing administrative tasks.</li>
-            <li>Maintained an ongoing content calendar and promotional planning system, reflecting comfort with routine, structured record-keeping and multi-task management under deadlines.</li>
-          </ul>
-          <div class="exp-photos">
-            <div class="exp-photo"><span>PHOTO 1</span></div>
-            <div class="exp-photo"><span>PHOTO 2</span></div>
-            <div class="exp-photo"><span>PHOTO 3</span></div>
+        <div class="exp-panel" data-exp="ntnu">
+          <div class="exp-panel-text">
+            <span class="exp-panel-org" data-i18n="ntnu-org">NTNU Wind Band — Taiwan</span>
+            <h3 data-i18n="ntnu-title">Public Relations &amp; Social Media Lead</h3>
+            <span class="exp-panel-date" data-i18n="ntnu-date">Jul 2024 – Aug 2025</span>
+            <ul>
+              <li data-i18n="ntnu-bullet1">Coordinated with corporate vendors to secure NT$350,000 in sponsorships, managing the associated documentation, agreements, and follow-up communications — directly transferable to HR documentation and vendor-facing administrative tasks.</li>
+              <li data-i18n="ntnu-bullet2">Maintained an ongoing content calendar and promotional planning system, reflecting comfort with routine, structured record-keeping and multi-task management under deadlines.</li>
+            </ul>
+          </div>
+          <div class="exp-panel-photos">
+            <div class="exp-photo exp-photo-main"><span data-i18n="photo-1">PHOTO 1</span></div>
+            <div class="exp-photo-row">
+              <div class="exp-photo"><span data-i18n="photo-2">PHOTO 2</span></div>
+              <div class="exp-photo"><span data-i18n="photo-3">PHOTO 3</span></div>
+            </div>
           </div>
         </div>
-      </article>
 
-      <article class="exp-card" tabindex="0">
-        <span class="exp-card-toggle" aria-hidden="true"></span>
-        <div class="exp-card-head">
-          <h3>YouTube Chinese Sentiment Analyzer</h3>
-          <span class="exp-card-org">Independent Project (BERT NLP Pipeline) — Taiwan</span>
-          <span class="exp-card-date">2024</span>
-        </div>
-        <div class="exp-card-reveal">
-          <ul>
-            <li>Built an end-to-end NLP pipeline — data collection, preprocessing, keyword extraction, and sentiment classification — then organized results into clear, structured reports.</li>
-            <li>Demonstrates precision and comfort maintaining structured, accurate data — directly relevant to keeping HR systems and employee records accurate and up to date.</li>
-          </ul>
-          <div class="exp-photos">
-            <div class="exp-photo"><span>PHOTO 1</span></div>
-            <div class="exp-photo"><span>PHOTO 2</span></div>
-            <div class="exp-photo"><span>PHOTO 3</span></div>
+        <div class="exp-panel" data-exp="sentiment">
+          <div class="exp-panel-text">
+            <span class="exp-panel-org" data-i18n="sentiment-org">Independent Project (BERT NLP Pipeline) — Taiwan</span>
+            <h3 data-i18n="sentiment-title">YouTube Chinese Sentiment Analyzer</h3>
+            <span class="exp-panel-date" data-i18n="sentiment-date">2024</span>
+            <ul>
+              <li data-i18n="sentiment-bullet1">Built an end-to-end NLP pipeline — data collection, preprocessing, keyword extraction, and sentiment classification — then organized results into clear, structured reports.</li>
+              <li data-i18n="sentiment-bullet2">Demonstrates precision and comfort maintaining structured, accurate data — directly relevant to keeping HR systems and employee records accurate and up to date.</li>
+            </ul>
+          </div>
+          <div class="exp-panel-photos">
+            <div class="exp-photo exp-photo-main"><span data-i18n="photo-1">PHOTO 1</span></div>
+            <div class="exp-photo-row">
+              <div class="exp-photo"><span data-i18n="photo-2">PHOTO 2</span></div>
+              <div class="exp-photo"><span data-i18n="photo-3">PHOTO 3</span></div>
+            </div>
           </div>
         </div>
-      </article>
 
-    </div>
-
-    <div class="exp-grid exp-grid-secondary">
-
-      <article class="exp-card" tabindex="0">
-        <span class="exp-card-toggle" aria-hidden="true"></span>
-        <div class="exp-card-head">
-          <h3>France CONCORDIA International Volunteer Program</h3>
-          <span class="exp-card-org">Concordia Association — France</span>
-        </div>
-        <div class="exp-card-reveal">
-          <p>Traveled independently to France to collaborate closely with young leaders from ten countries around the world, working on local town hall restoration, forest conservation, and community public education.</p>
-          <ul>
-            <li><strong>International Public Outreach &amp; Education:</strong> Led multicultural education initiatives for children in rural France, bridging language barriers and successfully using Taiwanese music as a means of cultural exchange.</li>
-            <li><strong>Cross-Border Advocacy &amp; Communication:</strong> Co-organized a workshop on climate change and environmental sustainability, engaging deeply with volunteers from Belgium, Serbia, and other countries on international geopolitical and cultural perspectives.</li>
-          </ul>
-          <div class="exp-photos">
-            <div class="exp-photo"><span>PHOTO 1</span></div>
-            <div class="exp-photo"><span>PHOTO 2</span></div>
-            <div class="exp-photo"><span>PHOTO 3</span></div>
+        <div class="exp-panel" data-exp="concordia">
+          <div class="exp-panel-text">
+            <span class="exp-panel-org" data-i18n="concordia-org">Concordia Association — France</span>
+            <h3 data-i18n="concordia-title">France CONCORDIA International Volunteer Program</h3>
+            <p data-i18n="concordia-desc">Traveled independently to France to collaborate closely with young leaders from ten countries around the world, working on local town hall restoration, forest conservation, and community public education.</p>
+            <ul>
+              <li data-i18n="concordia-bullet1"><strong>International Public Outreach &amp; Education:</strong> Led multicultural education initiatives for children in rural France, bridging language barriers and successfully using Taiwanese music as a means of cultural exchange.</li>
+              <li data-i18n="concordia-bullet2"><strong>Cross-Border Advocacy &amp; Communication:</strong> Co-organized a workshop on climate change and environmental sustainability, engaging deeply with volunteers from Belgium, Serbia, and other countries on international geopolitical and cultural perspectives.</li>
+            </ul>
+          </div>
+          <div class="exp-panel-photos">
+            <div class="exp-photo exp-photo-main"><span data-i18n="photo-1">PHOTO 1</span></div>
+            <div class="exp-photo-row">
+              <div class="exp-photo"><span data-i18n="photo-2">PHOTO 2</span></div>
+              <div class="exp-photo"><span data-i18n="photo-3">PHOTO 3</span></div>
+            </div>
           </div>
         </div>
-      </article>
 
-      <article class="exp-card" tabindex="0">
-        <span class="exp-card-toggle" aria-hidden="true"></span>
-        <div class="exp-card-head">
-          <h3>Taiwan–UAE Youth Exchange Program</h3>
-          <span class="exp-card-org">Selected as Taiwan Youth Representative — United Arab Emirates</span>
-        </div>
-        <div class="exp-card-reveal">
-          <p>Engaged with the core of the Middle East's technology and business sectors through a cross-disciplinary international exchange centered on leadership, entrepreneurship, and environmental sustainability.</p>
-          <ul>
-            <li><strong>Sustainability Project Practice:</strong> Took part in local environmental sustainability initiatives in the UAE, including hands-on tree-planting projects, cross-national youth forums, and extreme climate adaptation experiences.</li>
-            <li><strong>Cross-Disciplinary Business Thinking:</strong> Participated in entrepreneurship workshops and visits to leading local museums, integrating technology, human resources, and ESG (Environmental, Social, and Governance) thinking.</li>
-          </ul>
-          <div class="exp-photos">
-            <div class="exp-photo"><span>PHOTO 1</span></div>
-            <div class="exp-photo"><span>PHOTO 2</span></div>
-            <div class="exp-photo"><span>PHOTO 3</span></div>
+        <div class="exp-panel" data-exp="uae">
+          <div class="exp-panel-text">
+            <span class="exp-panel-org" data-i18n="uae-org">Selected as Taiwan Youth Representative — United Arab Emirates</span>
+            <h3 data-i18n="uae-title">Taiwan–UAE Youth Exchange Program</h3>
+            <p data-i18n="uae-desc">Engaged with the core of the Middle East's technology and business sectors through a cross-disciplinary international exchange centered on leadership, entrepreneurship, and environmental sustainability.</p>
+            <ul>
+              <li data-i18n="uae-bullet1"><strong>Sustainability Project Practice:</strong> Took part in local environmental sustainability initiatives in the UAE, including hands-on tree-planting projects, cross-national youth forums, and extreme climate adaptation experiences.</li>
+              <li data-i18n="uae-bullet2"><strong>Cross-Disciplinary Business Thinking:</strong> Participated in entrepreneurship workshops and visits to leading local museums, integrating technology, human resources, and ESG (Environmental, Social, and Governance) thinking.</li>
+            </ul>
+            <a class="exp-source" href="https://pr.ntnu.edu.tw/ntnunews/index.php?mode=data&amp;id=23076" target="_blank" rel="noopener" data-i18n="exp-source">Source: NTNU News →</a>
           </div>
-          <a class="exp-source" href="https://pr.ntnu.edu.tw/ntnunews/index.php?mode=data&amp;id=23076" target="_blank" rel="noopener">Source: NTNU News →</a>
+          <div class="exp-panel-photos">
+            <div class="exp-photo exp-photo-main"><span data-i18n="photo-1">PHOTO 1</span></div>
+            <div class="exp-photo-row">
+              <div class="exp-photo"><span data-i18n="photo-2">PHOTO 2</span></div>
+              <div class="exp-photo"><span data-i18n="photo-3">PHOTO 3</span></div>
+            </div>
+          </div>
         </div>
-      </article>
 
+        <div class="exp-tabs">
+          <span class="exp-tab" data-exp="fiabci" data-i18n="fiabci-title" tabindex="0">Media Liaison &amp; Liaison Interpreter</span>
+          <span class="exp-tab" data-exp="ntnu" data-i18n="ntnu-title" tabindex="0">Public Relations &amp; Social Media Lead</span>
+          <span class="exp-tab" data-exp="sentiment" data-i18n="sentiment-title" tabindex="0">YouTube Chinese Sentiment Analyzer</span>
+          <span class="exp-tab" data-exp="concordia" data-i18n="concordia-title" tabindex="0">France CONCORDIA International Volunteer Program</span>
+          <span class="exp-tab" data-exp="uae" data-i18n="uae-title" tabindex="0">Taiwan–UAE Youth Exchange Program</span>
+        </div>
+
+      </div>
     </div>
   </section>
 
   <section id="contact" class="section">
-    <span class="section-tag">03 — CONTACT</span>
-    <h2 class="section-title">Let's Talk</h2>
-    <p class="section-text">
+    <span class="section-tag" data-i18n="contact-tag">03 — CONTACT</span>
+    <h2 class="section-title" data-i18n="contact-title">Let's Talk</h2>
+    <p class="section-text" data-i18n="contact-text">
       Open to working student roles, collaborations, or just a good conversation about design and data.
     </p>
     <a href="mailto:syndrea1104@gmail.com" class="contact-link">syndrea1104@gmail.com</a>

@@ -101,6 +101,26 @@ body::before{
     0 0 40px rgba(255, 255, 255, .3);
 }
 
+.lang-toggle{
+  font-family: var(--font-mono);
+  font-size: .74rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, .8);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 999px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: color .3s ease, border-color .3s ease, background .3s ease;
+}
+
+.lang-toggle:hover{
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, .7);
+  background: rgba(255, 255, 255, .08);
+}
+
 /* ============================================================
    主视觉标题（HERO）
 ============================================================ */
@@ -407,180 +427,206 @@ body::before{
 }
 
 /* ============================================================
-   EXPERIENCE —— 悬停 / 点按展开的卡片
+   EXPERIENCE —— 悬停卡片全萤幕展开 + 底部标题切换
 ============================================================ */
+.exp-stage{ position: relative; }
+
 .exp-grid{
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 26px;
+  gap: 22px;
+  transition: opacity .3s ease;
 }
 
 .exp-grid-secondary{
   grid-template-columns: repeat(2, 1fr);
-  margin-top: 26px;
+  margin-top: 22px;
 }
 
-.exp-card{
+.exp-card-mini{
   position: relative;
   border: 1px solid rgba(255, 255, 255, .18);
   border-radius: 12px;
   background: rgba(255, 255, 255, .03);
-  padding: 26px 26px 24px;
+  padding: 22px 22px 20px;
   cursor: default;
-  transition: border-color .4s ease, background .4s ease;
+  transition: border-color .3s ease, background .3s ease;
 }
 
-.exp-card:hover,
-.exp-card:focus-within{
-  border-color: rgba(255, 255, 255, .55);
+.exp-card-mini:hover,
+.exp-card-mini:focus-within{
+  border-color: rgba(255, 255, 255, .5);
   background: rgba(255, 255, 255, .06);
 }
 
-.exp-card:focus-visible,
-.exp-card:focus{
+.exp-card-mini:focus-visible{
   outline: 2px solid rgba(255, 255, 255, .4);
   outline-offset: 4px;
 }
 
-.exp-card-toggle{
-  position: absolute;
-  top: 22px;
-  right: 22px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .4);
-  transition: background .3s ease, transform .3s ease, box-shadow .3s ease;
-}
-
-.exp-card:hover .exp-card-toggle,
-.exp-card:focus-within .exp-card-toggle{
-  background: #ffffff;
-  transform: scale(1.4);
-  box-shadow: 0 0 10px rgba(255, 255, 255, .7);
-}
-
-.exp-card-head h3{
+.exp-card-mini h3{
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1rem;
   line-height: 1.35;
   color: #ffffff;
   margin: 0 0 8px;
-  padding-right: 20px;
 }
 
-.exp-card-org{
+.exp-card-mini-org{
   display: block;
   font-family: var(--font-mono);
-  font-size: .78rem;
-  letter-spacing: .3px;
+  font-size: .76rem;
   color: rgba(255, 255, 255, .55);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
-.exp-card-date{
+.exp-card-mini-date{
   display: block;
   font-family: var(--font-mono);
-  font-size: .72rem;
-  letter-spacing: 1px;
+  font-size: .7rem;
+  letter-spacing: .5px;
   color: rgba(255, 255, 255, .4);
 }
 
-.exp-card-reveal{
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  margin-top: 0;
-  transition: max-height .6s ease, opacity .5s ease, margin-top .6s ease;
-}
-
-.exp-card:hover .exp-card-reveal,
-.exp-card:focus-within .exp-card-reveal{
-  max-height: 900px;
-  opacity: 1;
-  margin-top: 18px;
-}
-
-.exp-card-reveal p{
-  font-family: var(--font-mono);
-  font-size: .82rem;
-  line-height: 1.75;
-  color: rgba(255, 255, 255, .65);
-  margin: 0 0 14px;
-}
-
-.exp-card-reveal ul{
-  list-style: none;
-  margin: 0 0 18px;
-  padding: 0;
+/* 全萤幕聚光灯层：默认隐藏，滑到卡片或其内部才显示 */
+.exp-spotlight{
+  position: fixed;
+  top: 96px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(160deg, var(--bg) 0%, var(--bg-deep) 100%);
+  transition: opacity .4s ease;
 }
 
-.exp-card-reveal li{
-  position: relative;
-  padding-left: 18px;
+.exp-panel{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  padding: 60px 90px 120px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s ease;
+  overflow: auto;
+}
+
+.exp-panel-text{ flex: 1 1 420px; }
+
+.exp-panel-text .exp-panel-org{
+  display: block;
+  font-family: var(--font-mono);
+  font-size: .85rem;
+  color: rgba(255, 255, 255, .55);
+  margin-bottom: 10px;
+}
+
+.exp-panel-text h3{
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2rem;
+  line-height: 1.2;
+  color: #ffffff;
+  margin: 0 0 10px;
+}
+
+.exp-panel-text .exp-panel-date{
+  display: block;
   font-family: var(--font-mono);
   font-size: .8rem;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, .7);
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity .4s ease, transform .4s ease;
+  letter-spacing: .5px;
+  color: rgba(255, 255, 255, .4);
+  margin-bottom: 24px;
 }
 
-.exp-card-reveal li::before{
+.exp-panel-text p{
+  font-family: var(--font-mono);
+  font-size: .95rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, .68);
+  max-width: 520px;
+  margin: 0 0 20px;
+}
+
+.exp-panel-text ul{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.exp-panel-text li{
+  position: relative;
+  padding-left: 20px;
+  font-family: var(--font-mono);
+  font-size: .88rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, .72);
+}
+
+.exp-panel-text li::before{
   content: "—";
   position: absolute;
   left: 0;
   color: rgba(255, 255, 255, .4);
 }
 
-.exp-card-reveal li strong{ color: #ffffff; font-weight: 600; }
+.exp-panel-text li strong{ color: #ffffff; font-weight: 600; }
 
-.exp-card:hover .exp-card-reveal li,
-.exp-card:focus-within .exp-card-reveal li{
-  opacity: 1;
-  transform: translateY(0);
+.exp-source{
+  display: inline-block;
+  margin-top: 20px;
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  letter-spacing: .5px;
+  color: rgba(255, 255, 255, .5);
+  border-bottom: 1px solid rgba(255, 255, 255, .3);
+  transition: color .3s ease;
 }
 
-.exp-card-reveal li:nth-child(1){ transition-delay: .1s; }
-.exp-card-reveal li:nth-child(2){ transition-delay: .2s; }
-.exp-card-reveal li:nth-child(3){ transition-delay: .3s; }
+.exp-source:hover{ color: #ffffff; }
 
-.exp-photos{
+.exp-panel-photos{
+  flex: 1 1 380px;
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  max-height: 520px;
 }
+
+.exp-photo-row{
+  display: flex;
+  gap: 16px;
+  height: 160px;
+}
+
+.exp-photo-row .exp-photo{ flex: 1; }
+
+.exp-photo-main{ flex: 1; }
 
 .exp-photo{
-  flex: 1;
-  aspect-ratio: 1;
+  border: 1px dashed rgba(255, 255, 255, .35);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed rgba(255, 255, 255, .35);
-  border-radius: 8px;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity .4s ease, transform .4s ease;
+  overflow: hidden;
 }
-
-.exp-card:hover .exp-photo,
-.exp-card:focus-within .exp-photo{
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.exp-photo:nth-child(1){ transition-delay: .35s; }
-.exp-photo:nth-child(2){ transition-delay: .45s; }
-.exp-photo:nth-child(3){ transition-delay: .55s; }
 
 .exp-photo span{
   font-family: var(--font-mono);
-  font-size: .58rem;
+  font-size: .65rem;
   letter-spacing: 1px;
   color: rgba(255, 255, 255, .4);
 }
@@ -588,7 +634,6 @@ body::before{
 .exp-photo.has-img{
   border-style: solid;
   border-color: rgba(255, 255, 255, .18);
-  overflow: hidden;
   padding: 0;
 }
 
@@ -599,26 +644,62 @@ body::before{
   display: block;
 }
 
-.exp-source{
-  display: inline-block;
-  margin-top: 16px;
+.exp-tabs{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 30px;
+  padding: 22px 90px;
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  background: linear-gradient(0deg, var(--bg-deep) 40%, transparent);
+}
+
+.exp-tab{
   font-family: var(--font-mono);
   font-size: .74rem;
-  letter-spacing: .5px;
-  color: rgba(255, 255, 255, .5);
-  border-bottom: 1px solid rgba(255, 255, 255, .3);
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity .4s ease .6s, transform .4s ease .6s, color .3s ease;
+  letter-spacing: .3px;
+  color: rgba(255, 255, 255, .4);
+  border-bottom: 1px solid transparent;
+  cursor: default;
+  transition: color .3s ease, border-color .3s ease;
 }
 
-.exp-card:hover .exp-source,
-.exp-card:focus-within .exp-source{
+/* 聚光灯的开关与「目前显示哪一个经历」都由 JS 透过 class / data-active 控制 —
+   全萤幕遮罩本身会盖住触发它的迷你卡片，纯 CSS :hover 无法维持「记住是哪张卡」
+   的状态，所以这里改用 JS 写入的 state 来驱动，而不是 :has(:hover)。 */
+.exp-stage.is-open .exp-spotlight{
   opacity: 1;
-  transform: translateY(0);
+  pointer-events: auto;
 }
 
-.exp-source:hover{ color: #ffffff; }
+.exp-stage.is-open .exp-grid,
+.exp-stage.is-open .exp-grid-secondary{
+  opacity: 0;
+  pointer-events: none;
+}
+
+.exp-spotlight[data-active="fiabci"] .exp-panel[data-exp="fiabci"],
+.exp-spotlight[data-active="ntnu"] .exp-panel[data-exp="ntnu"],
+.exp-spotlight[data-active="sentiment"] .exp-panel[data-exp="sentiment"],
+.exp-spotlight[data-active="concordia"] .exp-panel[data-exp="concordia"],
+.exp-spotlight[data-active="uae"] .exp-panel[data-exp="uae"]{
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.exp-spotlight[data-active="fiabci"] .exp-tab[data-exp="fiabci"],
+.exp-spotlight[data-active="ntnu"] .exp-tab[data-exp="ntnu"],
+.exp-spotlight[data-active="sentiment"] .exp-tab[data-exp="sentiment"],
+.exp-spotlight[data-active="concordia"] .exp-tab[data-exp="concordia"],
+.exp-spotlight[data-active="uae"] .exp-tab[data-exp="uae"]{
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, .6);
+}
 
 /* CONTACT */
 .contact-link{
@@ -688,4 +769,30 @@ body::before{
   .exp-grid-secondary{
     grid-template-columns: 1fr;
   }
+
+  /* 手机上没有稳定的悬停手势，改成一律平铺展开，不做全萤幕聚光灯 */
+  .exp-spotlight{
+    position: static;
+    opacity: 1;
+    pointer-events: auto;
+    background: none;
+    margin-top: 30px;
+  }
+
+  .exp-panel{
+    position: static;
+    opacity: 1;
+    pointer-events: auto;
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 0 36px;
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
+    overflow: visible;
+  }
+
+  .exp-panel-photos{ flex-direction: column; height: auto; max-height: none; }
+  .exp-photo-main{ height: 200px; }
+  .exp-photo-row{ height: 120px; }
+  .exp-tabs{ display: none; }
 }
