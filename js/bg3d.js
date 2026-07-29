@@ -298,9 +298,6 @@ float occ = 1.; // Ambient occlusion (Fake)
 // Domain rep. ID
 #define rid(p, r) floor((p+r)/(r+r))
 
-// Finite domain rep.
-#define lrep(p, r, l) p-r*clamp(round(p/r), -l, l)
-
 // Fast random noise 2 -> 3
 vec3 hash(vec2 p) {
     vec2 r = fract(sin(p*mat2(137.1, 12.7, 74.7, 269.5)) * 43478.5453);
@@ -320,27 +317,18 @@ float rect(vec2 p, vec2 b) {
 }
 
 #define ext 2.
-float opElevatorWindows(vec3 p, float b) {
-    float e  = box(p, vec3(ext*.8, 2.7, .3));
-    float lv = length(p.xz) - .1;   p.y += 1.;
-    float lh = length(p.yz) - .1;
-    lh = max(b, lh);
-    b  = max(b, -e);
-    b  = min(b, min(lv, lh));
-    return b;
-}
 
+// 简化版：拿掉原本的电梯井、栏杆、背面横杆、侧窗几个细节几何（每个 building()
+// 呼叫要多跑好几次距离场运算），只留主体建筑量体＋窗洞＋发光窗格、遮蔽，
+// 视觉上还是「无限高楼＋会发光的窗」，但每步 raymarch 的运算量少了将近一半
 float building(vec3 p0, vec3 p, float L) {
     float B = rect(p.xz, vec2(L, 10)); // Main building
-    float B2 = rect(vec2(abs(p.x)-L-ext, p.z), vec2(ext, 10)); // Elevator building
 
     // (Optim) Skip building calculations
-    if (min(B, B2) > .2) return min(B, B2);
+    if (B > .2) return B;
 
     vec3 q = p;
-    float var = step(1., mod(rid(p.y, 3.), 6.)); // Railing variation
     p.y = rep(p.y, 3.); // Infinite floor y-repetition
-    vec3 pb = vec3(abs(p.x), p.yz);
 
     // Building lights
     vec3  id = rid(vec3(q.xy, p0.z), vec3(21, 18, 48));
@@ -358,51 +346,17 @@ float building(vec3 p0, vec3 p, float L) {
 
     // Occlusion
     occ = min(occ, smoothstep(3.5, 0., -rect(p.xz, vec2(L+2.,10))));
-    occ = min(occ, smoothstep(0.6, 0., -rect(pb.xz-vec2(L+ext,0), vec2(ext,10))));
 
-    // Front hole
+    // Front hole (window grid)
     q = p;
     q.x = rep(q.x, 7.);
-    q.y -= (1. - var)*1.01;
 
-    float f = box(q + vec3(0,0,10), vec3(6.6, 2. + var, 3));
+    float f = box(q + vec3(0,0,10), vec3(6.6, 2., 3));
     B = max(B, -f);
-    B = max(B, -rect(q.xz + vec2(0,10), vec2(6.6, .7)*var));
 
-    // Railing
-    q = p;
-    q.x = rep(q.x, .8);
-
-    float r  = length(p.yz + vec2(1, 9.5-var*.5)) - .2;
-    float rv = length(q.xz + vec2(0, 9.5-var*.5)) - .16;
-    r = min(r, rv);
-    r = max(r, p.y + 1.);
-
-    // Back bars
-    q = p;
-    q.x = rep(q.x, 1.75);
-
-    float b = length(q.xz + vec2(0, 7.3)) - .2;
-    r = min(r, b);
-
-    B = min(B, r);
     B = max(B, abs(p.x) - L);
 
-    // (Optim) Skip elevator calculations
-    if (B2 > .04) return min(B, B2);
-
-    // Elevator
-    B2 = opElevatorWindows(pb - vec3(L+ext,0,-9.9), B2);
-    B2 = opElevatorWindows(vec3(pb.z+8., pb.y, pb.x-L-ext-1.9), B2);
-
-    // Side windows
-    q = vec3(pb.xy, pb.z - 1.8);
-    q.z = lrep(q.z, 2.5, 2.);
-
-    float w = box(q - vec3(L+ext*2.,1.2,0), vec3(.5, 1.6, 1.2));
-    B2 = max(B2, -w);
-
-    return min(B, B2);
+    return B;
 }
 
 float map(vec3 p) {
@@ -460,12 +414,13 @@ void mainImage(out vec4 O, vec2 F) {
     rd.zx *= rot(rx);
     ro.zx *= rot(rx);
 
-    // Raymarching
+    // Raymarching（原本 60 步、最远 2200 单位；雾在远处早就把细节盖掉了，
+    // 砍到 38 步／900 单位画面看起来幾乎没差，但每个像素的运算量少了三分之一）
     vec3 p; float d, t = 0.;
-    for (int i = 0; i < 60; i++) {
+    for (int i = 0; i < 38; i++) {
         p = ro + t * rd;
         t += d = map(p);
-        if (d < .01 || t > 2200.) break;
+        if (d < .01 || t > 900.) break;
     }
 
     // Base color
