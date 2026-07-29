@@ -376,15 +376,16 @@ body::before{
   position: relative;
   border: 1px solid rgba(255, 255, 255, .18);
   border-radius: 12px;
-  background: rgba(255, 255, 255, .03);
+  background: rgba(255, 255, 255, 0.324);
   padding: 26px 26px 24px;
-  transition: border-color .4s ease, background .4s ease;
+  transition: border-color .4s ease, background .4s ease, color .3s ease;
 }
 
 .exp-card:hover,
 .exp-card:focus-within{
   border-color: rgba(255, 255, 255, .55);
-  background: rgba(255, 255, 255, .06);
+  /* 提高懸停時的白色不透明度，讓卡片底色更明顯 */
+  background: rgba(255, 255, 255, .18);
 }
 
 .exp-card:focus-visible{
@@ -418,6 +419,7 @@ body::before{
   color: #ffffff;
   margin: 0 0 8px;
   padding-right: 20px;
+  transition: color .3s ease;
 }
 
 .exp-card-org{
@@ -427,6 +429,7 @@ body::before{
   letter-spacing: .3px;
   color: rgba(255, 255, 255, .55);
   margin-bottom: 6px;
+  transition: color .3s ease;
 }
 
 .exp-card-date{
@@ -435,6 +438,7 @@ body::before{
   font-size: .72rem;
   letter-spacing: 1px;
   color: rgba(255, 255, 255, .4);
+  transition: color .3s ease;
 }
 
 /* 文字一律直接显示，不需要滑过才出现 */
@@ -448,6 +452,15 @@ body::before{
   line-height: 1.75;
   color: rgba(255, 255, 255, .65);
   margin: 0 0 14px;
+  transition: color .3s ease;
+}
+
+/* 懸停時提升文字對比，保持清晰可讀 */
+.exp-card:hover .exp-card-text p,
+.exp-card:hover .exp-card-head h3,
+.exp-card:hover .exp-card-org,
+.exp-card:hover .exp-card-date{
+  color: #ffffff;
 }
 
 .exp-card-text ul{
