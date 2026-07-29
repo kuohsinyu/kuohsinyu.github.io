@@ -248,22 +248,25 @@ body::before{
   50%{ transform: translateY(-5px); }
 }
 
-/* About Me 底下两张照片，取代原本的 "YOUR PHOTO HERE" 占位框。
-   之前用绝对定位贴齐 section 右边界，结果照片飘在离文字很远的空白处，
-   看起来仍然像个小角落装饰。改回正常排版，放在两段文字下面单独一整行，
-   横向空间不用再跟文字栏分——每张可以放到 350x478，比之前大一截。 */
+/* About Me 右侧两张照片，取代原本的 "YOUR PHOTO HERE" 占位框。
+   不要放在文字下面自成一行，要跟文字并排——但 section 本身宽度上限只有
+   1140px（border-box），扣掉左右 padding 只剩约 780px 内容宽度，两张照片
+   如果并排（左右排开）需要的宽度加上文字栏怎么样都塞不下。解法是把两张
+   照片直接「上下堆叠」成一个只有 300px 宽的直向栏位，跟文字栏（420px）
+   加上间距（60px）刚好等于 780px，不需要换行也不用挤压文字栏宽度。 */
 .about-photos{
   display: flex;
-  flex-wrap: wrap;
-  gap: 36px;
-  margin-top: 40px;
+  flex-direction: column;
+  flex: 0 0 auto;
+  gap: 20px;
+  width: 300px;
 }
 
 .about-photo{
   position: relative;
   flex: 0 0 auto;
-  width: 350px;
-  height: 478px;
+  width: 300px;
+  height: 410px;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .18);
@@ -271,7 +274,7 @@ body::before{
 }
 
 .about-photo:nth-child(1){ transform: rotate(-2deg); }
-.about-photo:nth-child(2){ transform: rotate(2deg); margin-top: 20px; }
+.about-photo:nth-child(2){ transform: rotate(2deg); margin-left: 20px; }
 
 .about-photo img{
   width: 100%;
@@ -292,9 +295,9 @@ body::before{
   box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
 }
 
-/* About Me 底下的 YouTube 影片嵌入 */
+/* About Me 底下的 YouTube 影片嵌入，水平置中 */
 .about-video{
-  margin-top: 40px;
+  margin: 40px auto 0;
   max-width: 700px;
 }
 
@@ -389,7 +392,9 @@ body::before{
   flex-wrap: wrap;
 }
 
-.about-copy{ flex: 1 1 420px; }
+/* 400(文字) + 60(间距) + 300(照片栏) = 760px，section 扣掉 padding 后大约
+   780px 内容宽度，刻意留一点余裕，避免四舍五入或滚动条宽度把两栏挤到换行 */
+.about-copy{ flex: 1 1 400px; }
 
 .section-hint{
   font-family: var(--font-mono);
