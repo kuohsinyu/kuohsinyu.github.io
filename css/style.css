@@ -248,25 +248,24 @@ body::before{
   50%{ transform: translateY(-5px); }
 }
 
-/* About Me 右侧两张照片，取代原本的 "YOUR PHOTO HERE" 占位框。
-   不要放在文字下面自成一行，要跟文字并排——但 section 本身宽度上限只有
-   1140px（border-box），扣掉左右 padding 只剩约 780px 内容宽度，两张照片
-   如果并排（左右排开）需要的宽度加上文字栏怎么样都塞不下。解法是把两张
-   照片直接「上下堆叠」成一个只有 300px 宽的直向栏位，跟文字栏（420px）
-   加上间距（60px）刚好等于 780px，不需要换行也不用挤压文字栏宽度。 */
+/* About Me 右侧两张照片，取代原本的 "YOUR PHOTO HERE" 占位框，跟文字并排、
+   两张照片左右排在同一排。上一版把 section 留在 1140px 宽度上限内，横向
+   塞不下文字栏 + 两张并排的照片，只能堆成上下两张，跟需求不符。这里直接
+   把 About 这个 section 加宽（见下面 #about 规则），留出足够横向空间，
+   两张照片才能缩小一点、但仍然并排显示，不用再堆叠。 */
+#about{ max-width: 1440px; }
+
 .about-photos{
   display: flex;
-  flex-direction: column;
   flex: 0 0 auto;
   gap: 20px;
-  width: 300px;
 }
 
 .about-photo{
   position: relative;
   flex: 0 0 auto;
-  width: 300px;
-  height: 410px;
+  width: 260px;
+  height: 355px;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .18);
@@ -274,7 +273,7 @@ body::before{
 }
 
 .about-photo:nth-child(1){ transform: rotate(-2deg); }
-.about-photo:nth-child(2){ transform: rotate(2deg); margin-left: 20px; }
+.about-photo:nth-child(2){ transform: rotate(2deg); margin-top: 20px; }
 
 .about-photo img{
   width: 100%;
@@ -295,9 +294,21 @@ body::before{
   box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
 }
 
-/* About Me 底下的 YouTube 影片嵌入，水平置中 */
+/* About Me 底下的 YouTube 影片嵌入。之前用 margin:auto 置中，只在
+   #about 自己的内容框里置中——但 section 本身是贴左对齐（body 没有把它
+   置中），content box 从 x=0 开始，宽度又不到满版，所以在够宽的萤幕上
+   看起来仍然偏左，不像「画面正中间」。这里让 wrap 撑满整个 viewport
+   宽度（100vw）、再往左推回 section 自己的左侧 padding，抵销掉 section
+   贴左造成的偏移，wrap 的左边界就会精准落在 viewport 的 x=0，
+   影片才能真正地在「整个画面」正中央，而不是只在内容栏里置中 */
+.about-video-wrap{
+  width: 100vw;
+  margin-left: -180px;
+  margin-top: 40px;
+}
+
 .about-video{
-  margin: 40px auto 0;
+  margin: 0 auto;
   max-width: 700px;
 }
 
@@ -737,6 +748,8 @@ body::before{
 
   .about-layout{ justify-content: center; text-align: center; }
   .about-photos{ margin: 0 auto; }
+  /* section 的左侧 padding 在这个断点变成 24px，破版宽度也要跟着改 */
+  .about-video-wrap{ margin-left: -24px; }
 
   #experience .exp-grid,
   #projects .exp-grid{
