@@ -1,6 +1,7 @@
 // ============================================================
-// 1) 中英文雙語切換
-// 2) Landing page 點矩陣互動
+// 1) 自訂游標：圓點即時跟隨、圓圈帶延遲地追著跑
+// 2) 中英文雙語切換
+// 3) Landing page 點矩陣互動
 // （Experience / Project & Program 的卡片展開純靠 CSS :hover / :focus-within，
 //   不需要額外的 JS）
 // ============================================================
@@ -155,6 +156,39 @@ const TRANSLATIONS = {
 const SKILL_KEYS = ['skill-photoshop', 'skill-illustrator', 'skill-canva', 'skill-python', 'skill-social', 'skill-data', 'skill-bilingual'];
 
 document.addEventListener('DOMContentLoaded', () => {
+  /* ---------------- 自訂游標 ---------------- */
+  const isTouch = window.matchMedia('(pointer: coarse)').matches;
+  const cursorDot = document.querySelector('.cursor-dot');
+  const cursorRing = document.querySelector('.cursor-ring');
+
+  if (!isTouch && cursorDot && cursorRing) {
+    let mouseX = 0;
+    let mouseY = 0;
+    let ringX = 0;
+    let ringY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.left = mouseX + 'px';
+      cursorDot.style.top = mouseY + 'px';
+    });
+
+    function tickRing() {
+      ringX += (mouseX - ringX) * 0.18;
+      ringY += (mouseY - ringY) * 0.18;
+      cursorRing.style.left = ringX + 'px';
+      cursorRing.style.top = ringY + 'px';
+      requestAnimationFrame(tickRing);
+    }
+    tickRing();
+
+    document.querySelectorAll('a, button, .exp-card, .photo-frame').forEach((el) => {
+      el.addEventListener('mouseenter', () => cursorRing.classList.add('is-active'));
+      el.addEventListener('mouseleave', () => cursorRing.classList.remove('is-active'));
+    });
+  }
+
   /* ---------------- 語言切換 ---------------- */
   const langToggle = document.getElementById('langToggle');
   const dotLabels = []; // 稍後在建立點矩陣時填入 {el, key}
@@ -215,9 +249,11 @@ document.addEventListener('DOMContentLoaded', () => {
           if (visited.size === SKILL_KEYS.length) {
             stage.classList.add('is-complete');
           }
+          if (cursorRing) cursorRing.classList.add('is-active');
         });
         dot.addEventListener('mouseleave', () => {
           dot.classList.remove('is-active');
+          if (cursorRing) cursorRing.classList.remove('is-active');
         });
       }
 
