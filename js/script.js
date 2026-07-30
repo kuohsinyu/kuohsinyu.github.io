@@ -41,7 +41,7 @@ const TRANSLATIONS = {
 
     'fiabci-title': 'Media Liaison &amp; Liaison Interpreter',
     'fiabci-org': '76th FIABCI World Congress — Vienna, Austria',
-    'fiabci-date': 'May 2026 · Freelance',
+    'fiabci-date': 'June 2026 · Freelance',
     'fiabci-bullet1': 'Coordinated schedules and on-site support for Taiwan media delegations at an international congress, working across corporate, government, and press stakeholders.',
     'fiabci-bullet2': 'Delivered real-time English–Mandarin interpretation and prepared written materials for accurate press coverage.',
 
@@ -134,7 +134,7 @@ const TRANSLATIONS = {
 
     'fiabci-title': '媒體聯絡與隨行口譯',
     'fiabci-org': '第76屆國際不動產聯盟世界大會 — 奧地利維也納',
-    'fiabci-date': '2026年5月・自由接案',
+    'fiabci-date': '2026年6月・自由接案',
     'fiabci-bullet1': '於國際會議中協調台灣媒體代表團的行程與現場支援，橫跨各國企業、政府與媒體等多方。',
     'fiabci-bullet2': '提供英語與中文即時口譯，並準備書面資料以確保媒體報導的準確性，同時補充部分攝影工作。',
 
