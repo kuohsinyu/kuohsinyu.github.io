@@ -1,9 +1,9 @@
 // ============================================================
-// 「另一個我」Modal 第二面的裝飾用 3D 場景：改編自 three.js 官方範例
-// webgl_postprocessing_rgb_halftone（RGB Halftone by Xavier Burrow），
-// 拿掉範例原本的 GUI 面板／FPS 計數器／OrbitControls（那些是給範例作者
-// 自己調參數用的開發工具，不該出現在正式網站上），只保留「一群方塊自動
-// 旋轉＋RGB 網點後製特效」這個純視覺畫面，當作裝飾用的核心視覺。
+// 「另一個我」Modal 第二面的核心視覺：改編自 three.js 官方範例
+// webgl_postprocessing_rgb_halftone（RGB Halftone by Xavier Burrow）。
+// 拿掉範例原本的 GUI 面板／FPS 計數器（那些是給範例作者自己調參數用的
+// 開發工具，不該出現在正式網站上），但保留 OrbitControls——訪客可以
+// 直接在畫面上拖曳去旋轉鏡頭看這群方塊，這是刻意保留的互動，不是裝飾。
 //
 // 只有在這個 section 真的捲進畫面、而且 Modal 是打開的時候才會渲染，
 // 滾出畫面或關掉 Modal 就整個暫停，不會跟主頁面的 Three.js 背景一起
@@ -11,6 +11,7 @@
 // ============================================================
 
 import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
@@ -23,6 +24,13 @@ if (container) {
 
   const camera = new THREE.PerspectiveCamera(60, 1, 1, 1000);
   camera.position.z = 14;
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.enablePan = false;
+  controls.minDistance = 6;
+  controls.maxDistance = 30;
 
   const scene = new THREE.Scene();
 
@@ -103,6 +111,7 @@ if (container) {
     const dt = Math.min(clock.getDelta(), 0.1);
     group.rotation.y += dt * rotationSpeed;
     group.rotation.x += dt * rotationSpeed * 0.3;
+    controls.update();
     composer.render(dt);
   }
 

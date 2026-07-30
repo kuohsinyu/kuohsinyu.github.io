@@ -1,19 +1,20 @@
 /* ============================================================
-   「另一個我」Modal —— 參考 landonorris.com 的編輯式攝影網站質感，
-   配色改用使用者提供的海洋色卡（深藍 → 粉彩薄荷 → 米白），全部走
-   「亮色底 + 淺色/白色文字」系統，不要近黑背景。字體沿用主站的
+   「另一個我」Modal —— 配色改用使用者提供的 green.png 色階（#CCFF00
+   單一色相的深淺漸變），只取淺～中段（不用最暗那兩排，維持「不要近黑
+   背景」的原則）。每個 section 是這個色階裡不同深淺的一格，section
+   之間彼此銜接處做漸層過渡（同一手法用在主站 Experience 區塊），不是
+   硬切换色。因為底色從深藍改成偏淺的黃綠，文字改用深色墨綠
+   （--am-ink），白字在這麼亮的底色上會看不清楚。字體沿用主站的
    Fraunces（標題）＋ JetBrains Mono（標籤）。
 ============================================================ */
 
 :root{
-  --am-deep:      #1A73A2;
-  --am-teal:      #1793B1;
-  --am-blue:      #45A1CB;
-  --am-sky:       #7FBADB;
-  --am-mint:      #90D7BC;
-  --am-mint-pale: #BFE4DB;
-  --am-cream:     #FCF9DE;
-  --am-ink:       #0b2e3d;
+  --am-ccff00: #CCFF00;
+  --am-c2:     #D8FF3F;
+  --am-c3:     #B6E400;
+  --am-c4:     #8FB300;
+  --am-ink:    #1a2a00;
+  --am-accent: #546a00;
 }
 
 /* ---------------- 導覽列按鈕 ---------------- */
@@ -37,14 +38,14 @@
   height: 6px;
   margin-right: 8px;
   border-radius: 50%;
-  background: var(--am-mint);
-  box-shadow: 0 0 8px rgba(144, 215, 188, .85);
+  background: var(--am-ccff00);
+  box-shadow: 0 0 8px rgba(204, 255, 0, .85);
   vertical-align: middle;
 }
 
 .nav-another-me:hover{
   color: #ffffff;
-  text-shadow: 0 0 10px rgba(144, 215, 188, .6);
+  text-shadow: 0 0 10px rgba(204, 255, 0, .6);
 }
 
 /* ---------------- Modal 外層 ---------------- */
@@ -52,7 +53,7 @@
   position: fixed;
   inset: 0;
   z-index: 900;
-  background: var(--am-deep);
+  background: var(--am-ccff00);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -73,6 +74,8 @@
   min-height: 100%;
 }
 
+/* 深色底的小圆钮，不管背后是暗色封面照还是浅黄绿的 section，
+   对比度都稳定，不用为了每个 section 底色深浅去切换关闭按钮的配色 */
 .modal-close{
   position: fixed;
   top: 32px;
@@ -81,8 +84,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, .3);
-  background: rgba(255, 255, 255, .14);
+  border: 1px solid rgba(255, 255, 255, .25);
+  background: rgba(26, 42, 0, .78);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
@@ -92,7 +95,7 @@
 }
 
 .modal-close:hover{
-  background: rgba(255, 255, 255, .28);
+  background: rgba(26, 42, 0, .95);
   transform: rotate(90deg);
 }
 
@@ -105,14 +108,12 @@
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
-  color: #ffffff;
 }
 
 .modal-section h2{
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 2.6rem;
-  color: #ffffff;
 }
 
 /* GSAP ScrollTrigger 用来做「每个 section 滚进画面时」的淡入＋上移动画，
@@ -120,7 +121,17 @@
 .am-reveal{ opacity: 0; transform: translateY(40px); }
 
 /* ---------------- Section 1：介紹 ---------------- */
-.intro-section{ padding: 0; }
+.intro-section{ padding: 0; color: #ffffff; }
+
+.intro-top-stripe{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 14px;
+  z-index: 3;
+  background: var(--am-ccff00);
+}
 
 .modal-hero-bg{ position: absolute; inset: 0; overflow: hidden; }
 
@@ -135,6 +146,18 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgba(10,40,60,.35) 0%, rgba(10,40,60,.6) 100%);
+}
+
+/* 封面底部淡到 #CCFF00，跟接下来的 Halftone section 顶部颜色精准衔接，
+   不是照片硬切到色块 */
+.intro-bottom-fade{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 240px;
+  z-index: 1;
+  background: linear-gradient(to bottom, rgba(204,255,0,0) 0%, var(--am-ccff00) 100%);
 }
 
 .intro-copy{ position: relative; z-index: 2; padding: 0 80px; }
@@ -161,9 +184,10 @@
   max-width: 520px;
 }
 
-/* ---------------- Section 2：Halftone 裝飾核心體 ---------------- */
+/* ---------------- Section 2：Halftone 核心體（可以拖曳旋轉） ---------------- */
 .halftone-section{
-  background: var(--am-deep);
+  background: var(--am-ccff00);
+  color: var(--am-ink);
   align-items: center;
   text-align: center;
 }
@@ -175,8 +199,11 @@
   margin: 0 auto 40px;
   border-radius: 16px;
   overflow: hidden;
-  background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.12), transparent 70%);
+  background: radial-gradient(circle at 50% 40%, rgba(0,0,0,.08), transparent 70%);
+  cursor: grab;
 }
+
+.halftone-canvas:active{ cursor: grabbing; }
 
 .halftone-canvas canvas{ display: block; width: 100%; height: 100%; }
 
@@ -184,21 +211,25 @@
 
 /* ---------------- Section 3：The World & Me（散落式編輯排版） ---------------- */
 .world-me-section{
-  background: var(--am-teal);
+  /* 顶部从 Halftone 的 #CCFF00 淡入自己的颜色，跟主站 Experience 区块
+     两侧渐层过渡是同一个手法，只是这里每个 section 底色都不同，
+     只需要在「后面那个」section 的顶部做一次淡入就能接上前一个的颜色 */
+  background: linear-gradient(to bottom, var(--am-ccff00) 0, var(--am-c2) 220px, var(--am-c2) 100%);
+  color: var(--am-ink);
   align-items: center;
 }
 
 .world-me-doodle{
   position: absolute;
   inset: -10% -5%;
-  opacity: .3;
+  opacity: .25;
   pointer-events: none;
 }
 
 .world-me-doodle svg{ width: 100%; height: 100%; }
 .world-me-doodle path{
   fill: none;
-  stroke: rgba(255, 255, 255, .55);
+  stroke: rgba(26, 42, 0, .35);
   stroke-width: 2;
 }
 
@@ -215,7 +246,7 @@
   font-family: var(--font-mono);
   font-size: .8rem;
   letter-spacing: 3px;
-  color: var(--am-cream);
+  color: var(--am-accent);
   margin-bottom: 18px;
 }
 
@@ -225,7 +256,7 @@
   font-family: var(--font-display);
   font-style: italic;
   font-size: 1.3rem;
-  color: rgba(255, 255, 255, .88);
+  color: rgba(26, 42, 0, .78);
   margin: 0;
 }
 
@@ -245,7 +276,7 @@
   border-radius: 6px;
   overflow: hidden;
   position: relative;
-  background: rgba(255, 255, 255, .1);
+  background: rgba(26, 42, 0, .08);
 }
 
 .world-me-card:nth-child(4n+1) .card-image-wrapper{ aspect-ratio: 3 / 4; }
@@ -271,15 +302,16 @@
   font-family: var(--font-mono);
   font-size: .74rem;
   letter-spacing: .5px;
-  color: rgba(255, 255, 255, .8);
+  color: rgba(26, 42, 0, .7);
 }
 
-.world-me-card .country-name{ color: #fff; font-weight: 600; margin-right: 8px; }
-.world-me-card .year{ color: var(--am-cream); }
+.world-me-card .country-name{ color: var(--am-ink); font-weight: 600; margin-right: 8px; }
+.world-me-card .year{ color: var(--am-accent); }
 
 /* ---------------- Section 4：Hobby（横向捲動相片牆） ---------------- */
 .hobby-section{
-  background: var(--am-blue);
+  background: linear-gradient(to bottom, var(--am-c2) 0, var(--am-c3) 220px, var(--am-c3) 100%);
+  color: var(--am-ink);
   justify-content: flex-start;
   padding-top: 160px;
 }
@@ -287,7 +319,7 @@
 .hobby-hint{
   font-family: var(--font-mono);
   font-size: .9rem;
-  color: rgba(255, 255, 255, .8);
+  color: rgba(26, 42, 0, .7);
   margin: 0 0 40px;
 }
 
@@ -317,7 +349,7 @@
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  background: rgba(255, 255, 255, .12);
+  background: rgba(26, 42, 0, .1);
   scroll-snap-align: start;
   transition: transform .35s ease;
 }
@@ -342,15 +374,16 @@
   z-index: 2;
   font-family: var(--font-mono);
   font-size: .78rem;
-  color: rgba(255, 255, 255, .92);
+  color: var(--am-ink);
   white-space: nowrap;
 }
 
-.hobby-card .card-label .year{ color: var(--am-cream); margin-left: 8px; }
+.hobby-card .card-label .year{ color: var(--am-accent); margin-left: 8px; }
 
 /* ---------------- Section 5：Bouldering（扇形展開） ---------------- */
 .bouldering-section{
-  background: var(--am-mint);
+  background: linear-gradient(to bottom, var(--am-c3) 0, var(--am-c4) 220px, var(--am-c4) 100%);
+  color: var(--am-ink);
   align-items: center;
 }
 
@@ -373,10 +406,10 @@
   margin: 0 0 0 -75px;
   border-radius: 10px;
   overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, .7);
-  box-shadow: 0 10px 24px rgba(11, 46, 61, .25);
+  border: 3px solid rgba(26, 42, 0, .3);
+  box-shadow: 0 10px 24px rgba(26, 42, 0, .2);
   cursor: pointer;
-  background: rgba(255, 255, 255, .2);
+  background: rgba(255, 255, 255, .35);
 }
 
 .bouldering-card img{
@@ -398,15 +431,15 @@
   font-family: var(--font-mono);
   font-size: .72rem;
   letter-spacing: .5px;
-  color: rgba(255, 255, 255, .92);
+  color: rgba(26, 42, 0, .85);
   background: repeating-linear-gradient(
     135deg,
-    rgba(255, 255, 255, .16),
-    rgba(255, 255, 255, .16) 10px,
-    rgba(255, 255, 255, .04) 10px,
-    rgba(255, 255, 255, .04) 20px
+    rgba(26, 42, 0, .12),
+    rgba(26, 42, 0, .12) 10px,
+    rgba(26, 42, 0, .03) 10px,
+    rgba(26, 42, 0, .03) 20px
   );
-  background-color: rgba(255, 255, 255, .1);
+  background-color: rgba(26, 42, 0, .06);
 }
 
 /* ---------------- 手機 / 窄螢幕 ---------------- */
