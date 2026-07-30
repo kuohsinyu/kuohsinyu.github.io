@@ -1,16 +1,20 @@
 /* ============================================================
-   「另一個我」Modal —— 獨立的視覺系統，刻意跟主站的深色沉浸式風格拉開
-   （螢光黃綠底 + 深色文字 + 三種強對比色點綴），展現作品集之外、比較
-   有玩心的一面。所有選色/排版數值都對應 ANOTHER_ME_FINAL_SPEC.md
+   「另一個我」Modal —— 參考 landonorris.com 的編輯式攝影網站質感：
+   每個區塊有自己的情緒色調（橄欖綠的故事感、近黑的畫廊感），不是整個
+   Modal 死板套用同一種螢光色；卡片走「照片為主、裝飾線條點綴」的路線，
+   不是強對比色框線。字體沿用主站的 Fraunces（標題）＋ JetBrains Mono
+   （標籤），跟 landonorris.com「粗襯線標題＋簡潔 sans 標籤」的搭配巧合地
+   一致，不用另外找字型。
 ============================================================ */
 
 :root{
-  --am-bg:        #CCFF00;
-  --am-ink:       #1a1a1a;
-  --am-ink-soft:  #555555;
-  --am-bouldering: #FF006E;
-  --am-travel:     #00B4D8;
-  --am-talents:    #FFA500;
+  --am-ink:        #1a1a1a;
+  --am-ink-soft:   #6b6b60;
+  --am-olive:      #454a37;
+  --am-olive-deep: #363a2b;
+  --am-near-black: #131311;
+  --am-lime:       #d5f26b;
+  --am-cream:      rgba(255, 255, 255, .92);
 }
 
 /* ---------------- 導覽列按鈕 ---------------- */
@@ -34,14 +38,14 @@
   height: 6px;
   margin-right: 8px;
   border-radius: 50%;
-  background: var(--am-bg);
-  box-shadow: 0 0 8px rgba(204, 255, 0, .9);
+  background: var(--am-lime);
+  box-shadow: 0 0 8px rgba(213, 242, 107, .8);
   vertical-align: middle;
 }
 
 .nav-another-me:hover{
   color: #ffffff;
-  text-shadow: 0 0 10px rgba(204, 255, 0, .7);
+  text-shadow: 0 0 10px rgba(213, 242, 107, .6);
 }
 
 /* ---------------- Modal 外層 ---------------- */
@@ -49,22 +53,14 @@
   position: fixed;
   inset: 0;
   z-index: 900;
-  background: var(--am-bg);
+  background: var(--am-near-black);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
 
-.modal-overlay.is-open{
-  pointer-events: auto;
-}
-
-/* GSAP 接手淡入淡出的 opacity/visibility，這里只需要提供初始/收合状态；
-   .hidden 只在完全关闭、连 GSAP 都还没跑过的最初状态使用 */
-.modal-overlay.hidden{
-  opacity: 0;
-  visibility: hidden;
-}
+.modal-overlay.is-open{ pointer-events: auto; }
+.modal-overlay.hidden{ opacity: 0; visibility: hidden; }
 
 .modal-scroll{
   height: 100%;
@@ -78,6 +74,8 @@
   min-height: 100%;
 }
 
+/* 每个区块背景色不同，靠固定在画面右上角的关闭按钮要在任何背景上都看得清楚，
+   所以用一个亮、半透明、带 blur 的圆形，不跟着各区块变色 */
 .modal-close{
   position: fixed;
   top: 32px;
@@ -86,43 +84,22 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 1px solid rgba(26, 26, 26, .3);
-  background: rgba(255, 255, 255, .35);
-  color: var(--am-ink);
+  border: 1px solid rgba(255, 255, 255, .25);
+  background: rgba(255, 255, 255, .12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
   font-size: 1.1rem;
   cursor: pointer;
   transition: background .3s ease, transform .3s ease;
 }
 
 .modal-close:hover{
-  background: rgba(255, 255, 255, .7);
+  background: rgba(255, 255, 255, .25);
   transform: rotate(90deg);
 }
 
-/* ---------------- 波紋背景裝飾 ---------------- */
-.modal-wave-animation{
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 240px;
-  overflow: hidden;
-  opacity: .35;
-  pointer-events: none;
-}
-
-.modal-wave-animation svg{
-  width: 100%;
-  height: 100%;
-}
-
-.wave-path{
-  fill: none;
-  stroke: #ffffff;
-  stroke-width: 2;
-}
-
-/* ---------------- Section 1：介紹 ---------------- */
+/* ---------------- 共用 ---------------- */
 .modal-section{
   position: relative;
   padding: 140px 80px;
@@ -130,18 +107,22 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  overflow: hidden;
 }
 
+.modal-section h2{
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.6rem;
+}
+
+/* ---------------- Section 1：介紹 ---------------- */
 .intro-section{
   padding: 0;
   color: #ffffff;
 }
 
-.modal-hero-bg{
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
+.modal-hero-bg{ position: absolute; inset: 0; overflow: hidden; }
 
 .modal-hero-bg img{
   width: 100%;
@@ -156,11 +137,7 @@
   background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.55) 100%);
 }
 
-.intro-copy{
-  position: relative;
-  z-index: 2;
-  padding: 0 80px;
-}
+.intro-copy{ position: relative; z-index: 2; padding: 0 80px; }
 
 .intro-copy h1{
   font-family: var(--font-display);
@@ -184,75 +161,84 @@
   max-width: 520px;
 }
 
-.modal-section h2{
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 2.6rem;
-  color: var(--am-ink);
-  margin: 0 0 48px;
-}
-
-/* ---------------- Section 2：抱石扇形排列 ---------------- */
-.bouldering-container{
-  display: flex;
+/* ---------------- Section 2：The World & Me（旅遊，散落式編輯排版） ---------------- */
+.world-me-section{
+  background: var(--am-olive);
+  color: var(--am-cream);
   align-items: center;
-  justify-content: center;
-  min-height: 480px;
 }
 
-.bouldering-grid{
-  position: relative;
-  width: 100%;
-  max-width: 900px;
-  height: 420px;
-}
-
-.bouldering-card{
+.world-me-doodle{
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150px;
-  height: 150px;
-  margin: -75px 0 0 -75px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 3px solid var(--am-bouldering);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, .15);
-  cursor: pointer;
-  background: #fff;
+  inset: -10% -5%;
+  opacity: .25;
+  pointer-events: none;
 }
 
-.bouldering-card img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.world-me-doodle svg{ width: 100%; height: 100%; }
+.world-me-doodle path{
+  fill: none;
+  stroke: rgba(255, 255, 255, .5);
+  stroke-width: 2;
 }
 
-/* ---------------- Section 3：旅遊卡片 ---------------- */
-.travel-grid{
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 20px;
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-.travel-card{
+.world-me-intro{
   position: relative;
-  aspect-ratio: 1;
-  border: 2px solid var(--am-travel);
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  background: #fff;
+  z-index: 2;
+  max-width: 680px;
+  margin: 0 auto 64px;
+  text-align: center;
 }
+
+.world-me-tag{
+  display: block;
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  letter-spacing: 3px;
+  color: var(--am-lime);
+  margin-bottom: 18px;
+}
+
+.world-me-intro h2{ margin: 0 0 22px; }
+
+.world-me-quote{
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, .82);
+  margin: 0;
+}
+
+/* 用 CSS columns 做成不整齐的错落式相片墙，而不是死板的等尺寸网格；
+   每张卡片高度随机（靠 nth-child 给不同高度），读起来更像随手贴上去的
+   旅行照片，而不是规格化的资料表格 */
+.world-me-grid{
+  position: relative;
+  z-index: 2;
+  columns: 4;
+  column-gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.world-me-card{
+  break-inside: avoid;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  background: rgba(0, 0, 0, .2);
+}
+
+.world-me-card:nth-child(4n+1) .card-image-wrapper{ aspect-ratio: 3 / 4; }
+.world-me-card:nth-child(4n+2) .card-image-wrapper{ aspect-ratio: 1 / 1; }
+.world-me-card:nth-child(4n+3) .card-image-wrapper{ aspect-ratio: 4 / 5; }
+.world-me-card:nth-child(4n+4) .card-image-wrapper{ aspect-ratio: 3 / 4; }
 
 .card-image-wrapper{
   position: relative;
   width: 100%;
-  height: 100%;
 }
 
 .card-image-wrapper img{
@@ -264,114 +250,118 @@
   display: block;
 }
 
-.card-image-hover{
-  opacity: 0;
-}
+.card-image-hover{ opacity: 0; }
 
-.travel-card .card-label{
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  z-index: 2;
-  background: rgba(0, 0, 0, .55);
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 4px;
+.world-me-card .card-label{
+  padding: 10px 2px 0;
   font-family: var(--font-mono);
-  font-size: .72rem;
-  line-height: 1.4;
-  text-align: right;
+  font-size: .74rem;
+  letter-spacing: .5px;
+  color: rgba(255, 255, 255, .75);
 }
 
-.travel-card .country-name{ display: block; font-weight: 600; }
-.travel-card .year{ display: block; opacity: .8; }
+.world-me-card .country-name{ color: #fff; font-weight: 600; margin-right: 8px; }
+.world-me-card .year{ color: var(--am-lime); }
 
-/* ---------------- Section 4：才藝 Carousel ---------------- */
-.talents-carousel-container{
-  max-width: 720px;
-  margin: 0 auto;
+/* ---------------- Section 3：Hobby（近黑底、缺角卡片畫廊） ---------------- */
+.hobby-section{
+  background: var(--am-near-black);
+  color: #fff;
+}
+
+.hobby-section h2{ color: #fff; margin: 0 0 48px; }
+
+.hobby-grid{
+  display: grid;
+  /* repeat(4, 1fr) 其实等同 repeat(4, minmax(auto, 1fr))：轨道不会缩到比
+     内容的 min-content 还小。原本卡片里一定有文字撑住宽度没事，但佔位块
+     改成不放文字之后，内容 min-content 直接塌成 0，整个 grid 跟着塌陷成
+     一小块。minmax(0, 1fr) 才是「不管内容多小，都照比例分配可用空间」。 */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   width: 100%;
+  gap: 24px;
+  max-width: 1300px;
+  margin: 0 auto;
 }
 
-.carousel-main{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 420px;
-  border: 3px solid var(--am-talents);
-  border-radius: 10px;
-  overflow: hidden;
-  padding: 16px;
-  background: #fff;
-}
-
-/* .am-placeholder 的 height:100% 是相对父层「内容高度」算的，父层是
-   flex 置中对齐（align-items:center）时子层的高度只会是文字那一行，
-   导致占位色块整个塌陷成一条细线。只针对占位元素用 align-self:stretch
-   撑满 carousel-main 的实际高度，不动 align-items 本身，真正的照片
-   （靠 max-height + object-fit:contain 自己控制大小）不受影响 */
-.carousel-main .am-placeholder{
-  /* .am-placeholder 本身写死 height:100%，align-self:stretch 只有在
-     子元素的高度是 auto 时才会生效——已经有明确的 height 值（就算是
-     100%、且解析起来因为父层高度不是「definite」而坍缩）时 stretch
-     不会覆盖它。要先把 height 盖回 auto，stretch 才真的有作用。 */
-  height: auto;
-  align-self: stretch;
-  flex: 1;
-}
-
-.carousel-main img{
-  max-width: 100%;
-  max-height: 388px;
-  object-fit: contain;
-  display: block;
-}
-
-.carousel-thumbnails{
-  display: flex;
-  gap: 16px;
-  padding: 20px 0;
-  justify-content: flex-end;
-}
-
-.carousel-thumbnails img{
-  width: 72px;
-  height: 72px;
-  object-fit: cover;
-  border: 1px solid var(--am-talents);
+/* 参考 landonorris.com 头盔画廊卡片右下角的斜切缺角造型 */
+.hobby-card{
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border: 1px solid rgba(255, 255, 255, .14);
   border-radius: 6px;
+  overflow: hidden;
   cursor: pointer;
-  transition: opacity .3s ease;
+  background: rgba(255, 255, 255, .04);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 34px), calc(100% - 34px) 100%, 0 100%);
+  transition: transform .3s ease;
+}
+
+.hobby-card:hover{ transform: translateY(-4px); }
+
+.hobby-card img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
-.carousel-thumbnails img:hover{ opacity: .7; }
-
-.carousel-controls{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-}
-
-.carousel-controls button{
-  padding: 10px 22px;
-  background: var(--am-talents);
+/* 标签放左下角，不放右下角——右下角那 34px 三角形被 clip-path 切掉了。
+   光是左移还不够：标签内容（分类名+编号+年份）长度不一，够长的字串
+   还是会一路延伸到右下角的斜切区域被吃掉一截。用 left+right 一起卡住
+   宽度（而不是只给 left，让内容自己决定多宽），年份独立成一行，
+   两个宽度上限都留出比 34px 缺角更宽的安全距离，不管文字多长都不会
+   碰到缺角。 */
+.hobby-card .card-label{
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  right: 44px;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  line-height: 1.4;
   color: #fff;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: .95rem;
-  transition: opacity .3s ease, transform .2s ease;
+  text-align: left;
 }
 
-.carousel-controls button:hover{ opacity: .85; transform: scale(1.05); }
+.hobby-card .card-label .year{ display: block; color: var(--am-lime); }
 
-.carousel-counter{
-  font-family: var(--font-mono);
-  color: var(--am-ink-soft);
-  font-size: .9rem;
+/* ---------------- Section 4：Bouldering（簡單網格，橫向卡片） ---------------- */
+.bouldering-section{
+  background: var(--am-near-black);
+  color: #fff;
+}
+
+.bouldering-section h2{ color: #fff; margin: 0 0 48px; }
+
+.bouldering-grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.bouldering-card{
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  background: rgba(255, 255, 255, .04);
+  transition: transform .3s ease;
+}
+
+.bouldering-card:hover{ transform: translateY(-4px); }
+
+.bouldering-card img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* ---------------- 缺圖佔位（照片尚未提供時的優雅備援） ---------------- */
@@ -389,24 +379,20 @@
   color: rgba(255, 255, 255, .85);
   background: repeating-linear-gradient(
     135deg,
-    rgba(0, 0, 0, .12),
-    rgba(0, 0, 0, .12) 10px,
-    rgba(0, 0, 0, .04) 10px,
-    rgba(0, 0, 0, .04) 20px
+    rgba(255, 255, 255, .08),
+    rgba(255, 255, 255, .08) 10px,
+    rgba(255, 255, 255, .02) 10px,
+    rgba(255, 255, 255, .02) 20px
   );
+  background-color: rgba(255, 255, 255, .06);
 }
-
-.bouldering-card .am-placeholder{ background-color: var(--am-bouldering); }
-.travel-card .am-placeholder{ background-color: var(--am-travel); }
-.carousel-main .am-placeholder,
-.carousel-thumbnails .am-placeholder{ background-color: var(--am-talents); }
 
 /* ---------------- 手機 / 窄螢幕 ---------------- */
 @media (max-width: 900px){
   .modal-section{ padding: 100px 24px; }
   .intro-copy{ padding: 0 24px; }
   .intro-copy h1{ font-size: 3rem; }
-  .travel-grid{ grid-template-columns: repeat(2, 1fr); }
-  .bouldering-card{ width: 100px; height: 100px; margin: -50px 0 0 -50px; }
-  .bouldering-grid{ height: 320px; }
+  .world-me-grid{ columns: 2; }
+  .hobby-grid{ grid-template-columns: repeat(2, 1fr); }
+  .bouldering-grid{ grid-template-columns: repeat(2, 1fr); }
 }

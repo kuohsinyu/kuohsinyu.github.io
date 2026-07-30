@@ -261,12 +261,6 @@
   <div class="modal-scroll">
     <div class="modal-content">
 
-      <div class="modal-wave-animation" aria-hidden="true">
-        <svg viewBox="0 0 1440 200" preserveAspectRatio="none">
-          <path class="wave-path" d="M0,100 Q360,40 720,100 T1440,100 V200 H0 Z"></path>
-        </svg>
-      </div>
-
       <section class="modal-section intro-section">
         <div class="modal-hero-bg">
           <img src="assets/img/another-me/hero-bg.jpg" alt="">
@@ -279,31 +273,29 @@
         </div>
       </section>
 
+      <section class="modal-section world-me-section">
+        <div class="world-me-doodle" aria-hidden="true">
+          <svg viewBox="0 0 1000 1000" preserveAspectRatio="none">
+            <path d="M-50,200 C 200,50 350,350 550,200 S 900,50 1050,250" />
+            <path d="M-50,650 C 250,500 400,800 600,650 S 950,500 1050,700" />
+          </svg>
+        </div>
+        <div class="world-me-intro">
+          <span class="world-me-tag" data-i18n="am-world-tag">THE WORLD &amp; ME</span>
+          <h2 data-i18n="am-world-title">我眼中的世界，與世界之間的我</h2>
+          <p class="world-me-quote" data-i18n="am-world-quote">走過的每個地方，都留下了一點點不一樣的自己。</p>
+        </div>
+        <div class="world-me-grid" id="worldMeGrid"></div>
+      </section>
+
+      <section class="modal-section hobby-section">
+        <h2 data-i18n="am-hobby-title">Hobby</h2>
+        <div class="hobby-grid" id="hobbyGrid"></div>
+      </section>
+
       <section class="modal-section bouldering-section">
         <h2 data-i18n="am-bouldering-title">抱石 Bouldering</h2>
-        <div class="bouldering-container">
-          <div class="bouldering-grid" id="boulderingGrid"></div>
-        </div>
-      </section>
-
-      <section class="modal-section travel-section">
-        <h2 data-i18n="am-travel-title">旅遊足跡 Travel Map</h2>
-        <div class="travel-container">
-          <div class="travel-grid" id="travelGrid"></div>
-        </div>
-      </section>
-
-      <section class="modal-section talents-section">
-        <h2 data-i18n="am-talents-title">才藝 Talents</h2>
-        <div class="talents-carousel-container">
-          <div class="carousel-main" id="talentsCarouselMain"></div>
-          <div class="carousel-thumbnails" id="talentsThumbnails"></div>
-          <div class="carousel-controls">
-            <button type="button" class="carousel-prev" id="talentsPrev" aria-label="Previous">←</button>
-            <span class="carousel-counter"><span id="currentIndex">1</span> / <span id="totalCount">1</span></span>
-            <button type="button" class="carousel-next" id="talentsNext" aria-label="Next">→</button>
-          </div>
-        </div>
+        <div class="bouldering-grid" id="boulderingGrid"></div>
       </section>
 
     </div>

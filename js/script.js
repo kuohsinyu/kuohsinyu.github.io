@@ -86,9 +86,11 @@ const TRANSLATIONS = {
 
     'nav-another-me': 'ANOTHER ME',
     'am-intro-subtitle': 'A look at my hobbies, my passions, and my travels',
+    'am-world-tag': 'THE WORLD &amp; ME',
+    'am-world-title': 'The World Through My Eyes, and Me Between the World',
+    'am-world-quote': 'Every place I have been left a slightly different version of me behind.',
+    'am-hobby-title': 'Hobby',
     'am-bouldering-title': 'Bouldering',
-    'am-travel-title': 'Travel Map',
-    'am-talents-title': 'Talents',
   },
   zh: {
     'nav-logo': '歡迎來到我的空間',
@@ -170,9 +172,11 @@ const TRANSLATIONS = {
 
     'nav-another-me': '另一個我',
     'am-intro-subtitle': '展現我的興趣、熱情、和旅程',
+    'am-world-tag': 'THE WORLD &amp; ME',
+    'am-world-title': '我眼中的世界，與世界之間的我',
+    'am-world-quote': '走過的每個地方，都留下了一點點不一樣的自己。',
+    'am-hobby-title': 'Hobby',
     'am-bouldering-title': '抱石 Bouldering',
-    'am-travel-title': '旅遊足跡 Travel Map',
-    'am-talents-title': '才藝 Talents',
   },
 };
 
