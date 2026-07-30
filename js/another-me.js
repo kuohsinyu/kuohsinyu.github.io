@@ -229,11 +229,12 @@
     });
   }
 
-  /* ---------------- Hobby 強制捲動：pin 住整個 section，捲動距離
-     拿去驅動裡面的照片直向位移，逼使用者要把整條 track 捲完（看完
-     所有照片）才會放開 pin、繼續往下滑到 Bouldering。取代原本鼠標
-     移過去就會被「跟隨鼠標位置」瞬間拉走、感覺太敏感/太快的橫向
-     自動捲動 ---------------- */
+  /* ---------------- Hobby 強制捲動：pin 住整個 section，滑鼠往下
+     滾動＝把橫向排開的照片往右推進看下一張，往上滾動＝往左倒回去看
+     上一張，直到看完最後一張才放開 pin 繼續往下到 Bouldering（往回
+     滾到第一張以前也會放開 pin 回到上一個 section）。照片本身還是
+     左右展示排開，不是自己跑掉的自動捲動——完全跟著滾動方向走，
+     不再有「鼠標一動就飆走」的跟隨鼠標邏輯，也沒有閒置自動漂移 ---------------- */
   function initHobbyScrollGate() {
     if (!window.gsap || !window.ScrollTrigger) return;
     gsap.registerPlugin(ScrollTrigger);
@@ -243,19 +244,19 @@
     const track = document.getElementById('hobbyGrid');
     if (!section || !viewport || !track) return;
 
-    gsap.set(track, { y: 0 });
+    gsap.set(track, { x: 0 });
 
     ScrollTrigger.create({
       trigger: section,
       scroller,
       start: 'top top',
-      end: () => '+=' + Math.max(1, track.scrollHeight - viewport.clientHeight),
+      end: () => '+=' + Math.max(1, track.scrollWidth - viewport.clientWidth),
       scrub: true,
       pin: true,
       anticipatePin: 1,
       onUpdate(self) {
-        const travel = track.scrollHeight - viewport.clientHeight;
-        gsap.set(track, { y: -travel * self.progress });
+        const travel = track.scrollWidth - viewport.clientWidth;
+        gsap.set(track, { x: -travel * self.progress });
       },
     });
   }

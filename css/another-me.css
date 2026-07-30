@@ -329,11 +329,11 @@
 
 .world-me-card .country-name{ color: var(--am-ink); font-weight: 600; }
 
-/* ---------------- Section 4：Hobby（直向捲動相片牆，強制看完才能繼續） ---------------- */
-/* 整個 section 會被 JS 用 ScrollTrigger pin 住：使用者滑到這裡時
-   畫面先固定不動，捲動距離拿去驅動 .hobby-track 往上位移，把裡面
-   的照片一張一張看完，直到卷完整條 track 才放開 pin、繼續往下滑到
-   Bouldering。取代原本「隨手往右滑一點就好」的橫向捲動 */
+/* ---------------- Section 4：Hobby（橫向展示，直向捲動驅動） ---------------- */
+/* 照片還是左右排開展示，但不再靠使用者自己橫向滑或跟隨鼠標——
+   整個 section 被 JS 用 ScrollTrigger pin 住，滑鼠往下滾動＝往右
+   看下一張，往上滾動＝往左倒回上一張，捲到最後一張才放開 pin
+   繼續往下到 Bouldering（往上滾到第一張以前也會放開繼續往上）*/
 .hobby-section{
   background: linear-gradient(to bottom, var(--am-c2) 0, var(--am-c3) 220px, var(--am-c3) 100%);
   color: var(--am-ink);
@@ -373,28 +373,29 @@
 
 .hobby-section > *{ position: relative; z-index: 1; }
 
-/* 捲動框固定高度，裡面的 track 用 transform 位移（由 JS 依 scroll
-   進度控制），本身不再自己 overflow-scroll */
+/* 捲動框固定寬度（撐滿視窗），裡面的 track 用 transform 橫向位移
+   （由 JS 依 scroll 進度控制），本身不再自己 overflow-scroll */
 .hobby-scroll{
-  width: 100%;
-  height: 620px;
+  width: 100vw;
+  margin-left: calc(-1 * 80px);
+  height: 480px;
   overflow: hidden;
   position: relative;
 }
 
 .hobby-track{
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 40px;
-  width: 100%;
-  padding: 40px 0 80px;
+  align-items: flex-end;
+  gap: 32px;
+  padding: 0 80px 20px 160px;
+  height: 100%;
+  width: max-content;
 }
 
 .hobby-card{
   position: relative;
   flex: 0 0 auto;
-  width: 460px;
+  width: 380px;
   aspect-ratio: 4 / 3;
   border-radius: 8px;
   overflow: hidden;
@@ -403,12 +404,12 @@
   transition: transform .35s ease;
 }
 
-/* 起伏改成左右錯開（原本橫向捲動時是上下錯落，直向捲動之後換成
-   左右位移），照片看起来还是随手排开，不是死板对齐的一直行 */
-.hobby-card:nth-child(4n+1){ transform: translateX(-90px); }
-.hobby-card:nth-child(4n+2){ transform: translateX(60px); width: 380px; }
-.hobby-card:nth-child(4n+3){ transform: translateX(-40px); width: 400px; }
-.hobby-card:nth-child(4n){ transform: translateX(100px); width: 340px; }
+/* 起伏用上下錯落，讓橫向排開的照片看起来还是随手排开，
+   不是死板对齐的一整排等高卡片 */
+.hobby-card:nth-child(4n+1){ margin-bottom: 100px; }
+.hobby-card:nth-child(4n+2){ margin-bottom: 0; }
+.hobby-card:nth-child(4n+3){ margin-bottom: 160px; }
+.hobby-card:nth-child(4n){ margin-bottom: 40px; width: 300px; }
 
 /* hover 上移的動畫交給 JS 的 gsap.to(card, {y}) 處理，這裡不用 CSS
    :hover 加 transform——GSAP 會正確保留已解析出的 translateX，
@@ -437,16 +438,21 @@
 /* ---------------- Section 5：Bouldering（16:9 長條橫幅，卡牌展開） ---------------- */
 /* 不再是整頁高的 section，改成寬螢幕比例的一條橫幅，底色維持淺色
    （跟其他分頁一致的亮黃綠斜坡），深色的 credits 另外接在下面一條 */
+/* 寬螢幕時 aspect-ratio: 16/9 換算出來的高度遠超過內容實際需要的
+   空間（標題＋扇形加起來才 500px 出頭），高度沒壓到跟內容相符，
+   看起來就像整塊沒有置中。改成固定高度＋viewport 高度上限一起夾住，
+   實際內容再靠 flex 置中，橫幅整體壓得更扁 */
 .bouldering-section{
   min-height: 0;
-  aspect-ratio: 16 / 9;
-  max-height: 100vh;
+  height: 640px;
+  max-height: 70vh;
   /* 承接 Hobby 结尾的 --am-c3，往上转回最浅的 --am-ccff00，
      維持「淺色橫幅」而不是接到更深更飽和的 --am-c4 */
   background: linear-gradient(to bottom, var(--am-c3) 0, var(--am-ccff00) 220px, var(--am-ccff00) 100%);
   color: var(--am-ink);
   align-items: center;
-  padding: 80px;
+  justify-content: center;
+  padding: 60px 80px;
 }
 
 .bouldering-section h2{ margin: 0 0 12px; }
@@ -545,7 +551,7 @@
   .world-me-grid{ grid-template-columns: repeat(2, 1fr); }
   .hobby-scroll{ margin-left: -24px; }
   .hobby-track{ padding: 0 24px; }
-  /* 窄螢幕上 16:9 橫幅塞不下扇形＋標題，改回自動高度 */
-  .bouldering-section{ aspect-ratio: auto; max-height: none; padding: 100px 24px; }
+  /* 窄螢幕上固定高度塞不下扇形＋標題，改回自動高度 */
+  .bouldering-section{ height: auto; max-height: none; padding: 100px 24px; }
   .bouldering-fan{ height: 420px; }
 }
