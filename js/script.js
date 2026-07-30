@@ -8,7 +8,7 @@
 const TRANSLATIONS = {
   en: {
     'nav-logo': 'Welcome to my space',
-    'nav-work': 'LANDING PAGE',
+    'nav-work': 'HOME PAGE',
     'nav-about': 'ABOUT',
     'nav-experience': 'EXPERIENCE',
     'nav-projects': 'PROJECT &amp; PROGRAM',
@@ -73,7 +73,7 @@ const TRANSLATIONS = {
     'heidelberg-title': 'Heidelberg University Exchange Program',
     'heidelberg-org': 'MOE 學海飛揚 Scholarship for Study Abroad — Heidelberg, Germany',
     'heidelberg-date': '2025 – 2026',
-    'heidelberg-bullet1': "Selected for a fully-funded academic year abroad under Taiwan's Ministry of Education 學海飛揚 Scholarship for Outstanding Students Studying Abroad.",
+    'heidelberg-bullet1': "Selected for a year abroad under Taiwan's Ministry of Education 學海飛揚 Scholarship for Outstanding Students Studying Abroad.",
     'heidelberg-bullet2': 'Continuing coursework in a new academic and cultural environment — adapting to a different language, teaching style, and daily life while building an international network.',
 
     'photo-1': 'PHOTO 1',
