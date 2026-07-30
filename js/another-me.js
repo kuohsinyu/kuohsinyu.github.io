@@ -23,7 +23,6 @@
   const travelCountries = [
     { id: 'iceland', zh: '冰島', en: 'Iceland', year: '2024' },
     { id: 'albania', zh: '阿爾巴尼亞', en: 'Albania', year: '2024' },
-    { id: 'switzerland', zh: '瑞士', en: 'Switzerland', year: '2024' },
     { id: 'croatia', zh: '克羅地亞', en: 'Croatia', year: '2024' },
     { id: 'egypt', zh: '埃及', en: 'Egypt', year: '2024' },
     { id: 'newyork', zh: '紐約', en: 'New York', year: '2024' },
@@ -41,7 +40,9 @@
     hoverImage: `assets/img/another-me/travel/${c.id}-hover.jpg`,
   }));
 
-  const talentCounts = { gymnastics: 1, clarinet: 5, guitar: 3, piano: 1, snowboard: 3, paragliding: 1 };
+  // 已经有真实照片的分类排在前面，滑到 Hobby 一开始就看得到内容，
+  // 还没照片的（体操/豎笛/吉他）排到后面
+  const talentCounts = { piano: 1, snowboard: 3, paragliding: 1, gymnastics: 1, clarinet: 5, guitar: 3 };
   const talentLabels = { gymnastics: '體操 Gymnastics', clarinet: '豎笛 Clarinet', guitar: '吉他 Guitar', piano: '鋼琴 Piano', snowboard: '滑單板 Snowboard', paragliding: '滑翔傘 Paragliding' };
   const talentYears = { gymnastics: '2022', clarinet: '2023', guitar: '2023', piano: '2021', snowboard: '2024', paragliding: '2026' };
   const talentsData = [];
@@ -75,7 +76,7 @@
     const container = document.getElementById('boulderingGrid');
     if (!container) return;
     const total = boulderingData.length;
-    const radius = 300;
+    const radius = 360; // 卡片整体放大 1.2 倍，展开半径跟着等比放大，间距才不会跟着挤在一起
     const angleSpan = 130; // 扇形总张角，中间那张朝正上方，左右各展开 65 度
 
     boulderingData.forEach((item, index) => {
@@ -99,7 +100,7 @@
       const y = radius * (1 - Math.cos(rad));
 
       if (window.gsap) {
-        gsap.set(card, { x, y, rotation: angle, transformOrigin: '50% 220px' });
+        gsap.set(card, { x, y, rotation: angle, transformOrigin: '50% 264px' });
       } else {
         card.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg)`;
       }
@@ -145,27 +146,23 @@
 
       const label = document.createElement('div');
       label.className = 'card-label';
-      label.innerHTML = `<span class="country-name">${c.en}</span><span class="year">${c.year}</span>`;
+      label.innerHTML = `<span class="country-name">${c.en}</span>`;
 
       card.appendChild(wrap);
       card.appendChild(label);
       grid.appendChild(card);
 
+      // 人物照原本停在自己框框下方 100% 的位置（藏在卡片底下看不到），
+      // 滑过去往上滑进来盖住风景照，滑开再往下滑出去，不是直接淡入淡出
+      if (window.gsap) gsap.set(hoverImg, { yPercent: 100 });
+
       card.addEventListener('mouseenter', () => {
-        const m = card.querySelector('.card-image-main');
         const h = card.querySelector('.card-image-hover');
-        if (window.gsap) {
-          gsap.to(m, { duration: 0.3, opacity: 0, ease: 'power2.out' });
-          gsap.to(h, { duration: 0.3, opacity: 1, ease: 'power2.out' });
-        }
+        if (window.gsap) gsap.to(h, { duration: 0.45, yPercent: 0, ease: 'power2.out' });
       });
       card.addEventListener('mouseleave', () => {
-        const m = card.querySelector('.card-image-main');
         const h = card.querySelector('.card-image-hover');
-        if (window.gsap) {
-          gsap.to(m, { duration: 0.3, opacity: 1, ease: 'power2.out' });
-          gsap.to(h, { duration: 0.3, opacity: 0, ease: 'power2.out' });
-        }
+        if (window.gsap) gsap.to(h, { duration: 0.4, yPercent: 100, ease: 'power2.in' });
       });
     });
   }

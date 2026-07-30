@@ -270,31 +270,28 @@
   margin: 0;
 }
 
+/* 改用固定 4 欄的 grid（不是 CSS columns），每張照片尺寸統一（都跟冰島
+   那張一樣的橫向比例），錯落感靠個別欄位的 margin-top 位移做出來，
+   不是靠每張照片尺寸不一樣 */
 .world-me-grid{
   position: relative;
   z-index: 2;
-  columns: 4;
-  column-gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
 }
 
 .world-me-card{
-  break-inside: avoid;
-  margin-bottom: 20px;
   border-radius: 6px;
   overflow: hidden;
   position: relative;
   background: rgba(26, 42, 0, .08);
 }
 
-.world-me-card:nth-child(4n+1) .card-image-wrapper{ aspect-ratio: 3 / 4; }
-.world-me-card:nth-child(4n+2) .card-image-wrapper{ aspect-ratio: 1 / 1; }
-.world-me-card:nth-child(4n+3) .card-image-wrapper{ aspect-ratio: 4 / 5; }
-.world-me-card:nth-child(4n+4) .card-image-wrapper{ aspect-ratio: 3 / 4; }
-
-.card-image-wrapper{ position: relative; width: 100%; }
+.card-image-wrapper{ position: relative; width: 100%; aspect-ratio: 4 / 3; }
 
 .card-image-wrapper img{
   position: absolute;
@@ -305,7 +302,16 @@
   display: block;
 }
 
-.card-image-hover{ opacity: 0; }
+/* 人物照預設藏在框框下方，滑過去才從下面滑上來蓋住風景照，
+   離開時再滑回下面去，不是淡入淡出 */
+.card-image-hover{ transform: translateY(100%); }
+
+/* 克羅埃西亞、法國這兩欄故意往下錯開約四分之一張照片的距離，
+   排版才有「隨手排開」的錯落感，不是每一欄都死板切齊 */
+.world-me-card[data-country="Croatia"],
+.world-me-card[data-country="France"]{
+  margin-top: 25%;
+}
 
 .world-me-card .card-label{
   padding: 10px 2px 0;
@@ -315,8 +321,7 @@
   color: rgba(26, 42, 0, .7);
 }
 
-.world-me-card .country-name{ color: var(--am-ink); font-weight: 600; margin-right: 8px; }
-.world-me-card .year{ color: var(--am-accent); }
+.world-me-card .country-name{ color: var(--am-ink); font-weight: 600; }
 
 /* ---------------- Section 4：Hobby（横向捲動相片牆） ---------------- */
 .hobby-section{
@@ -399,11 +404,13 @@
 
 .bouldering-section h2{ margin: 0 0 12px; }
 
+/* 整組扇形（容器＋卡片＋展開半徑）都放大 1.2 倍，比例一起调才不会
+   变大之后卡片彼此挤在一起 */
 .bouldering-fan{
   position: relative;
   width: 100%;
   max-width: 1100px;
-  height: 460px;
+  height: 552px;
   margin: 40px auto 0;
 }
 
@@ -411,9 +418,9 @@
   position: absolute;
   top: 0;
   left: 50%;
-  width: 150px;
-  height: 200px;
-  margin: 0 0 0 -75px;
+  width: 180px;
+  height: 240px;
+  margin: 0 0 0 -90px;
   border-radius: 10px;
   overflow: hidden;
   border: 3px solid rgba(26, 42, 0, .3);
@@ -457,7 +464,7 @@
   .modal-section{ padding: 100px 24px; }
   .intro-copy{ padding: 0 24px; }
   .intro-copy h1{ font-size: 3rem; }
-  .world-me-grid{ columns: 2; }
+  .world-me-grid{ grid-template-columns: repeat(2, 1fr); }
   .hobby-scroll{ margin-left: -24px; }
   .hobby-track{ padding: 0 24px; }
   .bouldering-fan{ height: 640px; }
