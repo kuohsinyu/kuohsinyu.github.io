@@ -284,16 +284,14 @@
   width: 100%;
 }
 
-/* 參考 landonorris.com 頭盔畫廊卡片右下角的斜切缺角造型 */
 .world-me-card{
   border-radius: 6px;
   overflow: hidden;
   position: relative;
   background: rgba(26, 42, 0, .08);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%);
 }
 
-.card-image-wrapper{ position: relative; width: 100%; aspect-ratio: 4 / 3; }
+.card-image-wrapper{ position: relative; width: 100%; aspect-ratio: 3 / 4; }
 
 .card-image-wrapper img{
   position: absolute;
@@ -311,31 +309,25 @@
    那么低，滑到上面时只会滑到「一张卡片的下面」，蓋不到风景照，
    问题就是这样来的。交给 JS 唯一负责，才不会有两边打架的偏移量。 */
 
-/* 克羅埃西亞、法國這兩欄故意往下錯開約四分之一張照片的距離，
-   排版才有「隨手排開」的錯落感，不是每一欄都死板切齊 */
-.world-me-card[data-country="Croatia"],
-.world-me-card[data-country="France"]{
-  margin-top: 25%;
-}
-
-/* 標籤疊在照片正下方（不是另外放在照片下面的一條），左下角對齊——
-   刻意不放右下角，右下角是斜切缺角的位置，文字放在那邊會被切掉一截
-   （Hobby 那邊踩过一次同样的坑）。不管是风景照还是滑上来的人物照，
-   标签都要盖在最上面维持看得清楚，所以 z-index 拉到比两张照片都高 */
+/* 標籤是一塊實心矩形缺口，貼在照片右下角——跟卡片背景同色，看起来
+   像從照片挖了一角出來。只在缺口朝照片那一角（左上角）倒圆角，
+   靠卡片外框的兩角維持直角，才吃得进卡片本身 6px 的 border-radius。
+   文字直接放在缺口里，不再需要底下那层深色渐层来保证可读性。 */
 .world-me-card .card-label{
   position: absolute;
-  left: 0;
-  right: 34px;
+  right: 0;
   bottom: 0;
   z-index: 3;
-  padding: 22px 10px 10px;
+  padding: 10px 16px 8px 20px;
+  border-top-left-radius: 14px;
   font-family: var(--font-mono);
   font-size: .78rem;
   letter-spacing: .5px;
-  background: linear-gradient(to top, rgba(11, 20, 0, .55), rgba(11, 20, 0, 0));
+  background: var(--am-c2);
+  white-space: nowrap;
 }
 
-.world-me-card .country-name{ color: #ffffff; font-weight: 600; }
+.world-me-card .country-name{ color: var(--am-ink); font-weight: 600; }
 
 /* ---------------- Section 4：Hobby（横向捲動相片牆） ---------------- */
 .hobby-section{
@@ -410,9 +402,11 @@
 .hobby-card .card-label .year{ color: var(--am-accent); margin-left: 8px; }
 
 /* ---------------- Section 5：Bouldering（扇形展開） ---------------- */
+/* 底色收到跟後面 credits 一样深的 #273000，两块之间才不会有接缝，
+   文字颜色也跟着从深字换成亮黄绿，不然深底配深字会看不到 */
 .bouldering-section{
-  background: linear-gradient(to bottom, var(--am-c3) 0, var(--am-c4) 220px, var(--am-c4) 100%);
-  color: var(--am-ink);
+  background: linear-gradient(to bottom, var(--am-c3) 0, #273000 220px, #273000 100%);
+  color: var(--am-ccff00);
   align-items: center;
 }
 
@@ -451,11 +445,13 @@
 }
 
 /* ---------------- 觸底：使用的網站與資源 ---------------- */
+/* 现在是 bouldering-section 里面的最后一块，跟扇形共用同一个深色底，
+   不再自己开一块背景，靠 margin-top 跟扇形拉开距离就好 */
 .am-credits{
   position: relative;
-  background: #273000;
   color: var(--am-ccff00);
-  padding: 48px 80px;
+  padding: 32px 0 0;
+  margin-top: 56px;
   font-family: var(--font-mono);
 }
 
