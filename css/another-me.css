@@ -284,11 +284,13 @@
   width: 100%;
 }
 
+/* 參考 landonorris.com 頭盔畫廊卡片右下角的斜切缺角造型 */
 .world-me-card{
   border-radius: 6px;
   overflow: hidden;
   position: relative;
   background: rgba(26, 42, 0, .08);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%);
 }
 
 .card-image-wrapper{ position: relative; width: 100%; aspect-ratio: 4 / 3; }
@@ -302,9 +304,12 @@
   display: block;
 }
 
-/* 人物照預設藏在框框下方，滑過去才從下面滑上來蓋住風景照，
-   離開時再滑回下面去，不是淡入淡出 */
-.card-image-hover{ transform: translateY(100%); }
+/* 人物照初始的「藏在下面」完全交给 JS 的 gsap.set(yPercent:100) 处理，
+   这里刻意不再用 CSS transform 设初始值——GSAP 第一次碰到元素时会把
+   已经存在的 CSS transform 解析成一个额外的像素级 y 分量，跟它自己
+   管理的 yPercent 叠加在一起，兩个人物照会变成藏在「两倍卡片高度」
+   那么低，滑到上面时只会滑到「一张卡片的下面」，蓋不到风景照，
+   问题就是这样来的。交给 JS 唯一负责，才不会有两边打架的偏移量。 */
 
 /* 克羅埃西亞、法國這兩欄故意往下錯開約四分之一張照片的距離，
    排版才有「隨手排開」的錯落感，不是每一欄都死板切齊 */
@@ -313,15 +318,24 @@
   margin-top: 25%;
 }
 
+/* 標籤疊在照片正下方（不是另外放在照片下面的一條），左下角對齊——
+   刻意不放右下角，右下角是斜切缺角的位置，文字放在那邊會被切掉一截
+   （Hobby 那邊踩过一次同样的坑）。不管是风景照还是滑上来的人物照，
+   标签都要盖在最上面维持看得清楚，所以 z-index 拉到比两张照片都高 */
 .world-me-card .card-label{
-  padding: 10px 2px 0;
+  position: absolute;
+  left: 0;
+  right: 34px;
+  bottom: 0;
+  z-index: 3;
+  padding: 22px 10px 10px;
   font-family: var(--font-mono);
-  font-size: .74rem;
+  font-size: .78rem;
   letter-spacing: .5px;
-  color: rgba(26, 42, 0, .7);
+  background: linear-gradient(to top, rgba(11, 20, 0, .55), rgba(11, 20, 0, 0));
 }
 
-.world-me-card .country-name{ color: var(--am-ink); font-weight: 600; }
+.world-me-card .country-name{ color: #ffffff; font-weight: 600; }
 
 /* ---------------- Section 4：Hobby（横向捲動相片牆） ---------------- */
 .hobby-section{
@@ -434,6 +448,36 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* ---------------- 觸底：使用的網站與資源 ---------------- */
+.am-credits{
+  position: relative;
+  background: #273000;
+  color: var(--am-ccff00);
+  padding: 48px 80px;
+  font-family: var(--font-mono);
+}
+
+.am-credits-title{
+  font-size: .85rem;
+  letter-spacing: 2px;
+  margin: 0 0 18px;
+  opacity: .85;
+}
+
+.am-credits ul{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.am-credits li{
+  font-size: .82rem;
+  line-height: 1.6;
 }
 
 /* ---------------- 缺圖佔位（照片尚未提供時的優雅備援） ---------------- */

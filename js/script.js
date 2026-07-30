@@ -94,6 +94,10 @@ const TRANSLATIONS = {
     'am-hobby-title': 'Hobby',
     'am-hobby-hint': 'Scroll right for more →',
     'am-bouldering-title': 'Bouldering',
+    'am-credits-title': 'Sites &amp; Resources',
+    'am-credits-1': 'Design inspiration — landonorris.com',
+    'am-credits-2': '3D effect — Three.js "RGB Halftone" by Xavier Burrow (CC BY-NC-SA 4.0)',
+    'am-credits-3': 'Animation — GSAP / ScrollTrigger',
   },
   zh: {
     'nav-logo': '歡迎來到我的空間',
@@ -183,6 +187,10 @@ const TRANSLATIONS = {
     'am-hobby-title': 'Hobby',
     'am-hobby-hint': '向右滑動看更多 →',
     'am-bouldering-title': '抱石 Bouldering',
+    'am-credits-title': '使用的網站與資源 Sites &amp; Resources',
+    'am-credits-1': '設計靈感 Design inspiration — landonorris.com',
+    'am-credits-2': '3D 特效 3D effect — Three.js「RGB Halftone」by Xavier Burrow（CC BY-NC-SA 4.0）',
+    'am-credits-3': '動畫引擎 Animation — GSAP / ScrollTrigger',
   },
 };
 
