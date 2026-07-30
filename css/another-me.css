@@ -447,7 +447,9 @@
   min-height: 0;
   aspect-ratio: 16 / 9;
   max-height: 100vh;
-  background: linear-gradient(to bottom, var(--am-c3) 0, var(--am-c4) 220px, var(--am-c4) 100%);
+  /* 承接 Hobby 结尾的 --am-c3，往上转回最浅的 --am-ccff00，
+     維持「淺色橫幅」而不是接到更深更飽和的 --am-c4 */
+  background: linear-gradient(to bottom, var(--am-c3) 0, var(--am-ccff00) 220px, var(--am-ccff00) 100%);
   color: var(--am-ink);
   align-items: center;
   padding: 80px;
