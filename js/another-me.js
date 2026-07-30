@@ -15,7 +15,7 @@
   if (!modal || !openBtn) return;
 
   /* ---------------- 資料 ---------------- */
-  const boulderingData = Array.from({ length: 10 }, (_, i) => {
+  const boulderingData = Array.from({ length: 6 }, (_, i) => {
     const n = String(i + 1).padStart(2, '0');
     return { image: `assets/img/another-me/bouldering/bouldering-${n}.jpg`, label: `Bouldering ${n}` };
   });
@@ -41,10 +41,40 @@
   }));
 
   // 已经有真实照片的分类排在前面，滑到 Hobby 一开始就看得到内容，
-  // 还没照片的（体操/豎笛/吉他）排到后面
-  const talentCounts = { piano: 1, snowboard: 3, paragliding: 1, gymnastics: 1, clarinet: 5, guitar: 3 };
-  const talentLabels = { gymnastics: '體操 Gymnastics', clarinet: '豎笛 Clarinet', guitar: '吉他 Guitar', piano: '鋼琴 Piano', snowboard: '滑單板 Snowboard', paragliding: '滑翔傘 Paragliding' };
-  const talentYears = { gymnastics: '2022', clarinet: '2023', guitar: '2023', piano: '2021', snowboard: '2024', paragliding: '2026' };
+  // 还没照片的（吉他）排到后面
+  const talentCounts = {
+    piano: 1,
+    snowboard: 3,
+    paragliding: 1,
+    gymnastics: 1,
+    clarinet: 4,
+    engineering: 1,
+    karting: 1,
+    'skateboard-art': 1,
+    guitar: 3,
+  };
+  const talentLabels = {
+    gymnastics: '體操 Gymnastics',
+    clarinet: '豎笛 Clarinet',
+    guitar: '吉他 Guitar',
+    piano: '鋼琴 Piano',
+    snowboard: '滑單板 Snowboard',
+    paragliding: '滑翔傘 Paragliding',
+    engineering: '工程實作 Engineering',
+    karting: '卡丁車 Karting',
+    'skateboard-art': '滑板彩繪 Skateboard Art',
+  };
+  const talentYears = {
+    gymnastics: '2022',
+    clarinet: '2023',
+    guitar: '2023',
+    piano: '2021',
+    snowboard: '2024',
+    paragliding: '2026',
+    engineering: '2023',
+    karting: '2024',
+    'skateboard-art': '2022',
+  };
   const talentsData = [];
   Object.keys(talentCounts).forEach((key) => {
     for (let i = 1; i <= talentCounts[key]; i++) {
@@ -76,8 +106,8 @@
     const container = document.getElementById('boulderingGrid');
     if (!container) return;
     const total = boulderingData.length;
-    const radius = 900; // 半径拉大、角度收小，卡片接近水平，只用左右位移＋极小旋转堆出展开感
-    const angleSpan = 26; // 扇形总张角收小很多，中间那张几乎朝正上方，左右各展开 13 度
+    const radius = 1450; // 只剩 6 張之後半徑再拉大，卡片才能真的攤開有間距，不會擠成一疊
+    const angleSpan = 34; // 张角跟着放宽一点，最外侧卡片略有翻转但整体仍接近水平
 
     boulderingData.forEach((item, index) => {
       const card = document.createElement('div');
@@ -200,6 +230,85 @@
         if (window.gsap) gsap.to(card, { duration: 0.3, y: 0, ease: 'power2.out' });
       });
     });
+
+    initHobbyAutoScroll();
+  }
+
+  /* ---------------- Hobby 自動滾動：沒人碰的時候自己慢慢往右漂，
+     漂到底就慢慢漂回來、來回無限循環；鼠標一旦移進捲動框，
+     滾動位置改成跟著鼠標的水平位置走（鼠標在框內越靠右，滾動目標
+     越往右），鼠標停在原地不動時，就從那個位置繼續往右慢慢漂，
+     不会卡住不动；鼠標離開才恢復自動來回漂移 ---------------- */
+  function initHobbyAutoScroll() {
+    const scroller = document.getElementById('hobbyScroll');
+    if (!scroller) return;
+
+    const IDLE_SPEED = 0.4; // px / frame，自動漂移的速度
+    const FOLLOW_EASE = 0.05; // 跟随鼠标时，趋近目标位置的缓动比例
+    let idleDir = 1; // 1 = 向右漂移，-1 = 向左漂移
+    let hovering = false;
+    let targetX = 0;
+    let visible = false;
+    let running = false;
+    let rafId = null;
+    // scrollLeft 这个 DOM 属性只存整数像素，每帧 +0.4 这种次像素增量
+    // 写进去马上被四舍五入吃掉，读回来永远是同一个整数、看起来完全没动。
+    // 改成自己另外记一个浮点数当真正的位置，只有算出新值之后才整数化
+    // 写回 scrollLeft，缓慢累积的次像素增量才不会被吞掉
+    let pos = scroller.scrollLeft;
+
+    function frame() {
+      if (!running) return;
+      const max = scroller.scrollWidth - scroller.clientWidth;
+      if (max <= 0) {
+        rafId = requestAnimationFrame(frame);
+        return;
+      }
+      if (hovering) {
+        pos += (targetX - pos) * FOLLOW_EASE;
+      } else {
+        if (pos >= max) idleDir = -1;
+        else if (pos <= 0) idleDir = 1;
+        pos += IDLE_SPEED * idleDir;
+      }
+      pos = Math.min(max, Math.max(0, pos));
+      scroller.scrollLeft = Math.round(pos);
+      rafId = requestAnimationFrame(frame);
+    }
+
+    function updateRunning() {
+      const shouldRun = visible;
+      if (shouldRun && !running) {
+        running = true;
+        frame();
+      } else if (!shouldRun && running) {
+        running = false;
+        if (rafId) cancelAnimationFrame(rafId);
+      }
+    }
+
+    scroller.addEventListener('mousemove', (e) => {
+      hovering = true;
+      const rect = scroller.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+      const max = scroller.scrollWidth - scroller.clientWidth;
+      targetX = ratio * max;
+      // 鼠标停在原地不再触发 mousemove 时，从当前位置继续缓慢向右漂移，
+      // 不会因为没有新的 mousemove 事件就整个停住不动
+      targetX = Math.min(max, targetX + 400);
+    });
+    scroller.addEventListener('mouseleave', () => {
+      hovering = false;
+    });
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => { visible = entry.isIntersecting; });
+        updateRunning();
+      },
+      { threshold: 0.15 },
+    );
+    io.observe(scroller);
   }
 
   /* ---------------- 封面第一次向上滑：照片從四角往內縮（pin 住畫面、
@@ -225,10 +334,22 @@
           scrub: true,
           pin: true,
           anticipatePin: 1,
+          // 缩小到一半大小之后，浏览器仍然是拿原本那张全尺寸的合成层去
+          // 做插值缩放，容易看起来糊糊的；捲回最顶端（progress 回到 0）
+          // 时强制清掉 will-change 底下残留的合成层，逼浏览器重新用
+          // scale:1 的原生尺寸重画一次，封面才会重新变回清晰
+          onUpdate(self) {
+            if (self.progress === 0) {
+              photoBox.style.willChange = 'auto';
+              // eslint-disable-next-line no-unused-expressions
+              photoBox.offsetHeight;
+              photoBox.style.willChange = 'transform, border-radius';
+            }
+          },
         },
       })
       .to(introCopy, { opacity: 0, y: -30, ease: 'none' }, 0)
-      .to(photoBox, { scale: 0.55, borderRadius: '20px', ease: 'none' }, 0);
+      .to(photoBox, { scale: 0.55, borderRadius: '20px', ease: 'none', force3D: true }, 0);
 
     // 線條持續慢慢漂移，跟捲動位置沒有關係，縮小之後才會露出來看到它在動
     lines.forEach((line, i) => {
