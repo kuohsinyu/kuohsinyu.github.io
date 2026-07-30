@@ -337,8 +337,12 @@
 .hobby-section{
   background: linear-gradient(to bottom, var(--am-c2) 0, var(--am-c3) 220px, var(--am-c3) 100%);
   color: var(--am-ink);
-  justify-content: flex-start;
-  padding-top: 160px;
+  /* 原本 flex-start + 固定 padding-top 会把标题跟照片列都钉在
+     section 最上方，section 整体被 pin 住撑满全屏之后，底下就多出
+     一大片没用到的空白。改成 gap 分隔标题跟照片、justify-content
+     交回 .modal-section 默认的 center，整组内容才会在 pin 住的
+     全屏范围内垂直置中 */
+  gap: 24px;
   position: relative;
 }
 
@@ -346,7 +350,7 @@
   font-family: var(--font-mono);
   font-size: .9rem;
   color: rgba(26, 42, 0, .7);
-  margin: 0 0 40px;
+  margin: 0;
 }
 
 /* 雲霄飛車式的流動光點背景——一路鋪滿整個 section，不受滾動框裁切；
@@ -385,9 +389,12 @@
 
 .hobby-track{
   display: flex;
-  align-items: flex-end;
+  /* 原本 flex-end 会把整排卡片都钉在捲動框底部，加上錯落的
+     margin-bottom 之後，實際照片離底邊很近；改成 center 讓整組
+     錯落的卡片群整體置中，上下留白才會平均 */
+  align-items: center;
   gap: 32px;
-  padding: 0 80px 20px 160px;
+  padding: 0 80px 0 160px;
   height: 100%;
   width: max-content;
 }

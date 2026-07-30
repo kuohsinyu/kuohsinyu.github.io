@@ -84,7 +84,7 @@ const TRANSLATIONS = {
     'contact-title': "Let's Talk",
     'contact-text': 'Open to working student roles, collaborations, or just a good conversation about design and data.',
 
-    'nav-another-me': 'ANOTHER ME',
+    'nav-another-me': 'MORE OF ME',
     'am-intro-subtitle': 'A look at my hobbies, my passions, and my travels',
     'am-halftone-tag': 'A LITTLE EXPERIMENT',
     'am-halftone-title': 'Me &amp; Life',
@@ -177,7 +177,7 @@ const TRANSLATIONS = {
     'contact-title': '現在聯絡我！',
     'contact-text': '歡迎實習職缺、合作機會，或單純想聊聊設計與創新的想法。',
 
-    'nav-another-me': '另一個我',
+    'nav-another-me': '更多的我',
     'am-intro-subtitle': '展現我的興趣、熱情、和旅程',
     'am-halftone-tag': 'A LITTLE EXPERIMENT',
     'am-halftone-title': '我與生活',
