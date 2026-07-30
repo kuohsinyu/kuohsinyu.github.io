@@ -76,8 +76,8 @@
     const container = document.getElementById('boulderingGrid');
     if (!container) return;
     const total = boulderingData.length;
-    const radius = 360; // 卡片整体放大 1.2 倍，展开半径跟着等比放大，间距才不会跟着挤在一起
-    const angleSpan = 130; // 扇形总张角，中间那张朝正上方，左右各展开 65 度
+    const radius = 900; // 半径拉大、角度收小，卡片接近水平，只用左右位移＋极小旋转堆出展开感
+    const angleSpan = 26; // 扇形总张角收小很多，中间那张几乎朝正上方，左右各展开 13 度
 
     boulderingData.forEach((item, index) => {
       const card = document.createElement('div');

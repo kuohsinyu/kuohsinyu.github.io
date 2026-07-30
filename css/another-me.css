@@ -352,13 +352,21 @@
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
   padding-bottom: 20px;
+  /* 保留滾動功能，但把捲軸本身藏起來（三家瀏覽器各自的隱藏語法都要寫） */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+
+.hobby-scroll::-webkit-scrollbar{ display: none; }
 
 .hobby-track{
   display: flex;
   align-items: flex-end;
   gap: 32px;
   padding: 0 80px;
+  /* 長條區域拉高 1.2 倍，讓下面的交錯位移有更多空間可以動，
+     不会被原本比较矮的长条卡死 */
+  height: 576px;
   width: max-content;
 }
 
@@ -375,9 +383,12 @@
   transition: transform .35s ease;
 }
 
-/* 每三张交错一次高度／垂直位移，读起来像随手排开的照片，不是死板等高网格 */
-.hobby-card:nth-child(3n+2){ margin-bottom: 60px; }
-.hobby-card:nth-child(3n){ width: 300px; }
+/* 起伏幅度加大，不再只是小小的 60px 落差——让照片摆放看起来
+   更随手、更有高低层次，不被锁在同一条水平带里 */
+.hobby-card:nth-child(4n+1){ margin-bottom: 140px; }
+.hobby-card:nth-child(4n+2){ margin-bottom: 0; }
+.hobby-card:nth-child(4n+3){ margin-bottom: 220px; }
+.hobby-card:nth-child(4n){ margin-bottom: 60px; width: 300px; }
 
 .hobby-card:hover{ transform: translateY(-6px); }
 
@@ -401,13 +412,17 @@
 
 .hobby-card .card-label .year{ color: var(--am-accent); margin-left: 8px; }
 
-/* ---------------- Section 5：Bouldering（扇形展開） ---------------- */
-/* 底色收到跟後面 credits 一样深的 #273000，两块之间才不会有接缝，
-   文字颜色也跟着从深字换成亮黄绿，不然深底配深字会看不到 */
+/* ---------------- Section 5：Bouldering（16:9 長條橫幅，卡牌展開） ---------------- */
+/* 不再是整頁高的 section，改成寬螢幕比例的一條橫幅，底色維持淺色
+   （跟其他分頁一致的亮黃綠斜坡），深色的 credits 另外接在下面一條 */
 .bouldering-section{
-  background: linear-gradient(to bottom, var(--am-c3) 0, #273000 220px, #273000 100%);
-  color: var(--am-ccff00);
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  max-height: 100vh;
+  background: linear-gradient(to bottom, var(--am-c3) 0, var(--am-c4) 220px, var(--am-c4) 100%);
+  color: var(--am-ink);
   align-items: center;
+  padding: 80px;
 }
 
 .bouldering-section h2{ margin: 0 0 12px; }
@@ -418,8 +433,8 @@
   position: relative;
   width: 100%;
   max-width: 1100px;
-  height: 552px;
-  margin: 40px auto 0;
+  height: 320px;
+  margin: 32px auto 0;
 }
 
 .bouldering-card{
@@ -445,13 +460,12 @@
 }
 
 /* ---------------- 觸底：使用的網站與資源 ---------------- */
-/* 现在是 bouldering-section 里面的最后一块，跟扇形共用同一个深色底，
-   不再自己开一块背景，靠 margin-top 跟扇形拉开距离就好 */
+/* 獨立一條深色橫幅，接在 16:9 的 bouldering-section 正下方 */
 .am-credits{
   position: relative;
+  background: #273000;
   color: var(--am-ccff00);
-  padding: 32px 0 0;
-  margin-top: 56px;
+  padding: 40px 80px;
   font-family: var(--font-mono);
 }
 
@@ -507,5 +521,7 @@
   .world-me-grid{ grid-template-columns: repeat(2, 1fr); }
   .hobby-scroll{ margin-left: -24px; }
   .hobby-track{ padding: 0 24px; }
-  .bouldering-fan{ height: 640px; }
+  /* 窄螢幕上 16:9 橫幅塞不下扇形＋標題，改回自動高度 */
+  .bouldering-section{ aspect-ratio: auto; max-height: none; padding: 100px 24px; }
+  .bouldering-fan{ height: 420px; }
 }
