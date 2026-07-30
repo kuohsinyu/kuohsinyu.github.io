@@ -1,0 +1,412 @@
+/* ============================================================
+   「另一個我」Modal —— 獨立的視覺系統，刻意跟主站的深色沉浸式風格拉開
+   （螢光黃綠底 + 深色文字 + 三種強對比色點綴），展現作品集之外、比較
+   有玩心的一面。所有選色/排版數值都對應 ANOTHER_ME_FINAL_SPEC.md
+============================================================ */
+
+:root{
+  --am-bg:        #CCFF00;
+  --am-ink:       #1a1a1a;
+  --am-ink-soft:  #555555;
+  --am-bouldering: #FF006E;
+  --am-travel:     #00B4D8;
+  --am-talents:    #FFA500;
+}
+
+/* ---------------- 導覽列按鈕 ---------------- */
+.nav-another-me{
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, .8);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color .3s ease, text-shadow .3s ease;
+}
+
+.nav-another-me::before{
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--am-bg);
+  box-shadow: 0 0 8px rgba(204, 255, 0, .9);
+  vertical-align: middle;
+}
+
+.nav-another-me:hover{
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(204, 255, 0, .7);
+}
+
+/* ---------------- Modal 外層 ---------------- */
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: var(--am-bg);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.modal-overlay.is-open{
+  pointer-events: auto;
+}
+
+/* GSAP 接手淡入淡出的 opacity/visibility，這里只需要提供初始/收合状态；
+   .hidden 只在完全关闭、连 GSAP 都还没跑过的最初状态使用 */
+.modal-overlay.hidden{
+  opacity: 0;
+  visibility: hidden;
+}
+
+.modal-scroll{
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-content{
+  position: relative;
+  min-height: 100%;
+}
+
+.modal-close{
+  position: fixed;
+  top: 32px;
+  right: 40px;
+  z-index: 910;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(26, 26, 26, .3);
+  background: rgba(255, 255, 255, .35);
+  color: var(--am-ink);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background .3s ease, transform .3s ease;
+}
+
+.modal-close:hover{
+  background: rgba(255, 255, 255, .7);
+  transform: rotate(90deg);
+}
+
+/* ---------------- 波紋背景裝飾 ---------------- */
+.modal-wave-animation{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  opacity: .35;
+  pointer-events: none;
+}
+
+.modal-wave-animation svg{
+  width: 100%;
+  height: 100%;
+}
+
+.wave-path{
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+/* ---------------- Section 1：介紹 ---------------- */
+.modal-section{
+  position: relative;
+  padding: 140px 80px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.intro-section{
+  padding: 0;
+  color: #ffffff;
+}
+
+.modal-hero-bg{
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.modal-hero-bg img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.modal-hero-overlay{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.55) 100%);
+}
+
+.intro-copy{
+  position: relative;
+  z-index: 2;
+  padding: 0 80px;
+}
+
+.intro-copy h1{
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 4.5rem;
+  margin: 0 0 6px;
+}
+
+.intro-en{
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.6rem;
+  margin: 0 0 24px;
+  color: rgba(255, 255, 255, .85);
+}
+
+.intro-subtitle{
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, .8);
+  max-width: 520px;
+}
+
+.modal-section h2{
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.6rem;
+  color: var(--am-ink);
+  margin: 0 0 48px;
+}
+
+/* ---------------- Section 2：抱石扇形排列 ---------------- */
+.bouldering-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 480px;
+}
+
+.bouldering-grid{
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  height: 420px;
+}
+
+.bouldering-card{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150px;
+  height: 150px;
+  margin: -75px 0 0 -75px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 3px solid var(--am-bouldering);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .15);
+  cursor: pointer;
+  background: #fff;
+}
+
+.bouldering-card img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ---------------- Section 3：旅遊卡片 ---------------- */
+.travel-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.travel-card{
+  position: relative;
+  aspect-ratio: 1;
+  border: 2px solid var(--am-travel);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #fff;
+}
+
+.card-image-wrapper{
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.card-image-wrapper img{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-image-hover{
+  opacity: 0;
+}
+
+.travel-card .card-label{
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 2;
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.travel-card .country-name{ display: block; font-weight: 600; }
+.travel-card .year{ display: block; opacity: .8; }
+
+/* ---------------- Section 4：才藝 Carousel ---------------- */
+.talents-carousel-container{
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.carousel-main{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+  border: 3px solid var(--am-talents);
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 16px;
+  background: #fff;
+}
+
+/* .am-placeholder 的 height:100% 是相对父层「内容高度」算的，父层是
+   flex 置中对齐（align-items:center）时子层的高度只会是文字那一行，
+   导致占位色块整个塌陷成一条细线。只针对占位元素用 align-self:stretch
+   撑满 carousel-main 的实际高度，不动 align-items 本身，真正的照片
+   （靠 max-height + object-fit:contain 自己控制大小）不受影响 */
+.carousel-main .am-placeholder{
+  /* .am-placeholder 本身写死 height:100%，align-self:stretch 只有在
+     子元素的高度是 auto 时才会生效——已经有明确的 height 值（就算是
+     100%、且解析起来因为父层高度不是「definite」而坍缩）时 stretch
+     不会覆盖它。要先把 height 盖回 auto，stretch 才真的有作用。 */
+  height: auto;
+  align-self: stretch;
+  flex: 1;
+}
+
+.carousel-main img{
+  max-width: 100%;
+  max-height: 388px;
+  object-fit: contain;
+  display: block;
+}
+
+.carousel-thumbnails{
+  display: flex;
+  gap: 16px;
+  padding: 20px 0;
+  justify-content: flex-end;
+}
+
+.carousel-thumbnails img{
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border: 1px solid var(--am-talents);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity .3s ease;
+  display: block;
+}
+
+.carousel-thumbnails img:hover{ opacity: .7; }
+
+.carousel-controls{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.carousel-controls button{
+  padding: 10px 22px;
+  background: var(--am-talents);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: .95rem;
+  transition: opacity .3s ease, transform .2s ease;
+}
+
+.carousel-controls button:hover{ opacity: .85; transform: scale(1.05); }
+
+.carousel-counter{
+  font-family: var(--font-mono);
+  color: var(--am-ink-soft);
+  font-size: .9rem;
+}
+
+/* ---------------- 缺圖佔位（照片尚未提供時的優雅備援） ---------------- */
+.am-placeholder{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  letter-spacing: .5px;
+  color: rgba(255, 255, 255, .85);
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(0, 0, 0, .12),
+    rgba(0, 0, 0, .12) 10px,
+    rgba(0, 0, 0, .04) 10px,
+    rgba(0, 0, 0, .04) 20px
+  );
+}
+
+.bouldering-card .am-placeholder{ background-color: var(--am-bouldering); }
+.travel-card .am-placeholder{ background-color: var(--am-travel); }
+.carousel-main .am-placeholder,
+.carousel-thumbnails .am-placeholder{ background-color: var(--am-talents); }
+
+/* ---------------- 手機 / 窄螢幕 ---------------- */
+@media (max-width: 900px){
+  .modal-section{ padding: 100px 24px; }
+  .intro-copy{ padding: 0 24px; }
+  .intro-copy h1{ font-size: 3rem; }
+  .travel-grid{ grid-template-columns: repeat(2, 1fr); }
+  .bouldering-card{ width: 100px; height: 100px; margin: -50px 0 0 -50px; }
+  .bouldering-grid{ height: 320px; }
+}

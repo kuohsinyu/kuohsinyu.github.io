@@ -83,6 +83,12 @@ const TRANSLATIONS = {
     'contact-tag': '04 — CONTACT',
     'contact-title': "Let's Talk",
     'contact-text': 'Open to working student roles, collaborations, or just a good conversation about design and data.',
+
+    'nav-another-me': 'ANOTHER ME',
+    'am-intro-subtitle': 'A look at my hobbies, my passions, and my travels',
+    'am-bouldering-title': 'Bouldering',
+    'am-travel-title': 'Travel Map',
+    'am-talents-title': 'Talents',
   },
   zh: {
     'nav-logo': '歡迎來到我的空間',
@@ -161,6 +167,12 @@ const TRANSLATIONS = {
     'contact-tag': '04 — 聯絡',
     'contact-title': '現在聯絡我！',
     'contact-text': '歡迎實習職缺、合作機會，或單純想聊聊設計與創新的想法。',
+
+    'nav-another-me': '另一個我',
+    'am-intro-subtitle': '展現我的興趣、熱情、和旅程',
+    'am-bouldering-title': '抱石 Bouldering',
+    'am-travel-title': '旅遊足跡 Travel Map',
+    'am-talents-title': '才藝 Talents',
   },
 };
 
