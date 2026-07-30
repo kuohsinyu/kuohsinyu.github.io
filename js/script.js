@@ -39,7 +39,7 @@ const TRANSLATIONS = {
     'proj-title': 'Project &amp; Program',
     'proj-hint': 'Hover (or tap) a card to see the details',
 
-    'fiabci-title': 'Media Liaison &amp; Liaison Interpreter',
+    'fiabci-title': 'Media Liaison &amp; Interpreter',
     'fiabci-org': '76th FIABCI World Congress — Vienna, Austria',
     'fiabci-date': 'June 2026 · Freelance',
     'fiabci-bullet1': 'Interpreted and coordinated on-site for a 22-person Taiwan delegation spanning 5 media outlets (CommonWealth, Global Views, Business Weekly, TTV, and Mirror Media) across a 9-day itinerary, at a congress that drew nearly 200 Taiwanese industry representatives alongside delegations from the US, Malaysia, Germany, and Italy.',
