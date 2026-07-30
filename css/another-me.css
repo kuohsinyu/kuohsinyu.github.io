@@ -329,12 +329,17 @@
 
 .world-me-card .country-name{ color: var(--am-ink); font-weight: 600; }
 
-/* ---------------- Section 4：Hobby（横向捲動相片牆） ---------------- */
+/* ---------------- Section 4：Hobby（直向捲動相片牆，強制看完才能繼續） ---------------- */
+/* 整個 section 會被 JS 用 ScrollTrigger pin 住：使用者滑到這裡時
+   畫面先固定不動，捲動距離拿去驅動 .hobby-track 往上位移，把裡面
+   的照片一張一張看完，直到卷完整條 track 才放開 pin、繼續往下滑到
+   Bouldering。取代原本「隨手往右滑一點就好」的橫向捲動 */
 .hobby-section{
   background: linear-gradient(to bottom, var(--am-c2) 0, var(--am-c3) 220px, var(--am-c3) 100%);
   color: var(--am-ink);
   justify-content: flex-start;
   padding-top: 160px;
+  position: relative;
 }
 
 .hobby-hint{
@@ -343,8 +348,6 @@
   color: rgba(26, 42, 0, .7);
   margin: 0 0 40px;
 }
-
-.hobby-section{ position: relative; }
 
 /* 雲霄飛車式的流動光點背景——一路鋪滿整個 section，不受滾動框裁切；
    兩層不同速度、不同角度的漸層點陣疊在一起用 background-position 位移，
@@ -370,39 +373,28 @@
 
 .hobby-section > *{ position: relative; z-index: 1; }
 
-/* 滾動框不再用 scroll-snap 對齊——現在交給 JS 做連續的自動漂移／
-   跟隨鼠標，snap 對齊反而會在自動滾動時一直被拉回卡片邊界，變頓挫 */
+/* 捲動框固定高度，裡面的 track 用 transform 位移（由 JS 依 scroll
+   進度控制），本身不再自己 overflow-scroll */
 .hobby-scroll{
-  width: 100vw;
-  margin-left: calc(-1 * 80px);
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 20px;
-  /* 保留滾動功能，但把捲軸本身藏起來（三家瀏覽器各自的隱藏語法都要寫） */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  width: 100%;
+  height: 620px;
+  overflow: hidden;
+  position: relative;
 }
-
-.hobby-scroll::-webkit-scrollbar{ display: none; }
 
 .hobby-track{
   display: flex;
-  align-items: flex-end;
-  gap: 32px;
-  /* 第一張卡片跟左邊界之間留白加大，滾動框本身沒有 snap 之後
-     這段留白才不會被「自動對齊」吃掉 */
-  padding: 0 80px 0 160px;
-  /* 長條區域拉高 1.2 倍，讓下面的交錯位移有更多空間可以動，
-     不会被原本比较矮的长条卡死 */
-  height: 576px;
-  width: max-content;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+  padding: 40px 0 80px;
 }
 
 .hobby-card{
   position: relative;
   flex: 0 0 auto;
-  width: 380px;
+  width: 460px;
   aspect-ratio: 4 / 3;
   border-radius: 8px;
   overflow: hidden;
@@ -411,14 +403,16 @@
   transition: transform .35s ease;
 }
 
-/* 起伏幅度加大，不再只是小小的 60px 落差——让照片摆放看起来
-   更随手、更有高低层次，不被锁在同一条水平带里 */
-.hobby-card:nth-child(4n+1){ margin-bottom: 140px; }
-.hobby-card:nth-child(4n+2){ margin-bottom: 0; }
-.hobby-card:nth-child(4n+3){ margin-bottom: 220px; }
-.hobby-card:nth-child(4n){ margin-bottom: 60px; width: 300px; }
+/* 起伏改成左右錯開（原本橫向捲動時是上下錯落，直向捲動之後換成
+   左右位移），照片看起来还是随手排开，不是死板对齐的一直行 */
+.hobby-card:nth-child(4n+1){ transform: translateX(-90px); }
+.hobby-card:nth-child(4n+2){ transform: translateX(60px); width: 380px; }
+.hobby-card:nth-child(4n+3){ transform: translateX(-40px); width: 400px; }
+.hobby-card:nth-child(4n){ transform: translateX(100px); width: 340px; }
 
-.hobby-card:hover{ transform: translateY(-6px); }
+/* hover 上移的動畫交給 JS 的 gsap.to(card, {y}) 處理，這裡不用 CSS
+   :hover 加 transform——GSAP 會正確保留已解析出的 translateX，
+   兩邊都設反而會互相打架 */
 
 .hobby-card img{
   width: 100%;

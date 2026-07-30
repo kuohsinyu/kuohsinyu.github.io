@@ -40,8 +40,8 @@
     hoverImage: `assets/img/another-me/travel/${c.id}-hover.jpg`,
   }));
 
-  // 已经有真实照片的分类排在前面，滑到 Hobby 一开始就看得到内容，
-  // 还没照片的（吉他）排到后面
+  // 只放已经有真实照片的分类——吉他还没有照片，整个分类先拿掉，
+  // 不留下缺图佔位块占位置
   const talentCounts = {
     piano: 1,
     snowboard: 3,
@@ -51,12 +51,10 @@
     engineering: 1,
     karting: 1,
     'skateboard-art': 1,
-    guitar: 3,
   };
   const talentLabels = {
     gymnastics: '體操 Gymnastics',
     clarinet: '豎笛 Clarinet',
-    guitar: '吉他 Guitar',
     piano: '鋼琴 Piano',
     snowboard: '滑單板 Snowboard',
     paragliding: '滑翔傘 Paragliding',
@@ -67,7 +65,6 @@
   const talentYears = {
     gymnastics: '2022',
     clarinet: '2023',
-    guitar: '2023',
     piano: '2021',
     snowboard: '2024',
     paragliding: '2026',
@@ -230,85 +227,37 @@
         if (window.gsap) gsap.to(card, { duration: 0.3, y: 0, ease: 'power2.out' });
       });
     });
-
-    initHobbyAutoScroll();
   }
 
-  /* ---------------- Hobby 自動滾動：沒人碰的時候自己慢慢往右漂，
-     漂到底就慢慢漂回來、來回無限循環；鼠標一旦移進捲動框，
-     滾動位置改成跟著鼠標的水平位置走（鼠標在框內越靠右，滾動目標
-     越往右），鼠標停在原地不動時，就從那個位置繼續往右慢慢漂，
-     不会卡住不动；鼠標離開才恢復自動來回漂移 ---------------- */
-  function initHobbyAutoScroll() {
-    const scroller = document.getElementById('hobbyScroll');
-    if (!scroller) return;
+  /* ---------------- Hobby 強制捲動：pin 住整個 section，捲動距離
+     拿去驅動裡面的照片直向位移，逼使用者要把整條 track 捲完（看完
+     所有照片）才會放開 pin、繼續往下滑到 Bouldering。取代原本鼠標
+     移過去就會被「跟隨鼠標位置」瞬間拉走、感覺太敏感/太快的橫向
+     自動捲動 ---------------- */
+  function initHobbyScrollGate() {
+    if (!window.gsap || !window.ScrollTrigger) return;
+    gsap.registerPlugin(ScrollTrigger);
+    const scroller = modal.querySelector('.modal-scroll');
+    const section = document.querySelector('.hobby-section');
+    const viewport = document.getElementById('hobbyScroll');
+    const track = document.getElementById('hobbyGrid');
+    if (!section || !viewport || !track) return;
 
-    const IDLE_SPEED = 0.4; // px / frame，自動漂移的速度
-    const FOLLOW_EASE = 0.05; // 跟随鼠标时，趋近目标位置的缓动比例
-    let idleDir = 1; // 1 = 向右漂移，-1 = 向左漂移
-    let hovering = false;
-    let targetX = 0;
-    let visible = false;
-    let running = false;
-    let rafId = null;
-    // scrollLeft 这个 DOM 属性只存整数像素，每帧 +0.4 这种次像素增量
-    // 写进去马上被四舍五入吃掉，读回来永远是同一个整数、看起来完全没动。
-    // 改成自己另外记一个浮点数当真正的位置，只有算出新值之后才整数化
-    // 写回 scrollLeft，缓慢累积的次像素增量才不会被吞掉
-    let pos = scroller.scrollLeft;
+    gsap.set(track, { y: 0 });
 
-    function frame() {
-      if (!running) return;
-      const max = scroller.scrollWidth - scroller.clientWidth;
-      if (max <= 0) {
-        rafId = requestAnimationFrame(frame);
-        return;
-      }
-      if (hovering) {
-        pos += (targetX - pos) * FOLLOW_EASE;
-      } else {
-        if (pos >= max) idleDir = -1;
-        else if (pos <= 0) idleDir = 1;
-        pos += IDLE_SPEED * idleDir;
-      }
-      pos = Math.min(max, Math.max(0, pos));
-      scroller.scrollLeft = Math.round(pos);
-      rafId = requestAnimationFrame(frame);
-    }
-
-    function updateRunning() {
-      const shouldRun = visible;
-      if (shouldRun && !running) {
-        running = true;
-        frame();
-      } else if (!shouldRun && running) {
-        running = false;
-        if (rafId) cancelAnimationFrame(rafId);
-      }
-    }
-
-    scroller.addEventListener('mousemove', (e) => {
-      hovering = true;
-      const rect = scroller.getBoundingClientRect();
-      const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-      const max = scroller.scrollWidth - scroller.clientWidth;
-      targetX = ratio * max;
-      // 鼠标停在原地不再触发 mousemove 时，从当前位置继续缓慢向右漂移，
-      // 不会因为没有新的 mousemove 事件就整个停住不动
-      targetX = Math.min(max, targetX + 400);
-    });
-    scroller.addEventListener('mouseleave', () => {
-      hovering = false;
-    });
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => { visible = entry.isIntersecting; });
-        updateRunning();
+    ScrollTrigger.create({
+      trigger: section,
+      scroller,
+      start: 'top top',
+      end: () => '+=' + Math.max(1, track.scrollHeight - viewport.clientHeight),
+      scrub: true,
+      pin: true,
+      anticipatePin: 1,
+      onUpdate(self) {
+        const travel = track.scrollHeight - viewport.clientHeight;
+        gsap.set(track, { y: -travel * self.progress });
       },
-      { threshold: 0.15 },
-    );
-    io.observe(scroller);
+    });
   }
 
   /* ---------------- 封面第一次向上滑：照片從四角往內縮（pin 住畫面、
@@ -385,9 +334,12 @@
       );
     });
 
+    // Hobby 的卡片不进这个 stagger reveal——它们的位置已经交给
+    // initHobbyScrollGate() 的 pin+scrub 逐张位移控制，GSAP 在这里
+    // 再用 y 做一次 fromTo 会跟卡片本来 CSS 设的 translateX 打架
+    // （两者都会整个覆写 transform，其中一个会被吃掉）
     [
       ['.world-me-card', '#worldMeGrid'],
-      ['.hobby-card', '#hobbyGrid'],
       ['.bouldering-card', '#boulderingGrid'],
     ].forEach(([cardSelector, containerSelector]) => {
       const container = document.querySelector(containerSelector);
@@ -419,6 +371,7 @@
       initHobby();
       initBouldering();
       initIntroShrink();
+      initHobbyScrollGate();
       initScrollReveals();
       initialized = true;
     }
