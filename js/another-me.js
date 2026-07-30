@@ -204,6 +204,46 @@
     });
   }
 
+  /* ---------------- 封面第一次向上滑：照片從四角往內縮（pin 住畫面、
+     捲動距離換算成縮小進度），露出後面 #3a4900 底色＋跑動的 #ccff00
+     線條；縮完之後繼續往上滑，才放開 pin、正常捲進 Halftone 那一面 ---------------- */
+  function initIntroShrink() {
+    if (!window.gsap || !window.ScrollTrigger) return;
+    gsap.registerPlugin(ScrollTrigger);
+    const scroller = modal.querySelector('.modal-scroll');
+    const introSection = document.getElementById('introSection');
+    const photoBox = document.getElementById('introPhotoBox');
+    const introCopy = introSection ? introSection.querySelector('.intro-copy') : null;
+    const lines = introSection ? introSection.querySelectorAll('.intro-line') : [];
+    if (!introSection || !photoBox) return;
+
+    gsap
+      .timeline({
+        scrollTrigger: {
+          trigger: introSection,
+          scroller,
+          start: 'top top',
+          end: () => '+=' + window.innerHeight,
+          scrub: true,
+          pin: true,
+          anticipatePin: 1,
+        },
+      })
+      .to(introCopy, { opacity: 0, y: -30, ease: 'none' }, 0)
+      .to(photoBox, { scale: 0.55, borderRadius: '20px', ease: 'none' }, 0);
+
+    // 線條持續慢慢漂移，跟捲動位置沒有關係，縮小之後才會露出來看到它在動
+    lines.forEach((line, i) => {
+      gsap.to(line, {
+        x: i % 2 === 0 ? 60 : -60,
+        duration: 9 + i * 2.5,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+      });
+    });
+  }
+
   /* ---------------- 捲動進場動畫：每個分頁自己的標題／說明淡入上移，
      卡片群組用 stagger 一張一張陸續出現，滾動到哪裡就補上動畫，
      不是整頁一次全部靜態擺好 ---------------- */
@@ -259,6 +299,7 @@
       initWorldMe();
       initHobby();
       initBouldering();
+      initIntroShrink();
       initScrollReveals();
       initialized = true;
     }

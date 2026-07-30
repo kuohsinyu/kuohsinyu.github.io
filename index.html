@@ -263,14 +263,20 @@
   <div class="modal-scroll">
     <div class="modal-content">
 
-      <section class="modal-section intro-section">
-        <div class="intro-top-stripe" aria-hidden="true"></div>
-        <div class="modal-hero-bg">
+      <section class="modal-section intro-section" id="introSection">
+        <div class="intro-bg-layer" aria-hidden="true"></div>
+        <div class="intro-lines-layer" aria-hidden="true">
+          <svg viewBox="0 0 1000 1000" preserveAspectRatio="none">
+            <path class="intro-line" d="M-50,200 C 200,50 350,350 550,200 S 900,50 1050,250" />
+            <path class="intro-line" d="M-50,650 C 250,500 400,800 600,650 S 950,500 1050,700" />
+            <path class="intro-line" d="M-50,420 C 150,600 500,240 850,460 S 1150,340 1300,500" />
+          </svg>
+        </div>
+        <div class="modal-hero-bg" id="introPhotoBox">
           <img src="assets/img/another-me/hero-bg.jpg" alt="">
           <div class="modal-hero-overlay"></div>
-          <div class="intro-bottom-fade" aria-hidden="true"></div>
         </div>
-        <div class="intro-copy am-reveal">
+        <div class="intro-copy">
           <h1 id="anotherMeTitle">另一個我</h1>
           <p class="intro-en">Another Me</p>
           <p class="intro-subtitle" data-i18n="am-intro-subtitle">展現我的興趣、熱情、和旅程</p>
