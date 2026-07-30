@@ -33,6 +33,7 @@
     { id: 'austria', zh: '奧地利', en: 'Austria', year: '2024' },
     { id: 'germany', zh: '德國', en: 'Germany', year: '2024' },
     { id: 'france', zh: '法國', en: 'France', year: '2024 / 2025 / 2026' },
+    { id: 'greece', zh: '希臘', en: 'Greece', year: '2024' },
   ];
   const travelData = travelCountries.map((c) => ({
     ...c,
@@ -40,9 +41,9 @@
     hoverImage: `assets/img/another-me/travel/${c.id}-hover.jpg`,
   }));
 
-  const talentCounts = { gymnastics: 1, clarinet: 5, guitar: 3, piano: 1, snowboard: 3 };
-  const talentLabels = { gymnastics: '體操 Gymnastics', clarinet: '豎笛 Clarinet', guitar: '吉他 Guitar', piano: '鋼琴 Piano', snowboard: '滑單板 Snowboard' };
-  const talentYears = { gymnastics: '2022', clarinet: '2023', guitar: '2023', piano: '2021', snowboard: '2024' };
+  const talentCounts = { gymnastics: 1, clarinet: 5, guitar: 3, piano: 1, snowboard: 3, paragliding: 1 };
+  const talentLabels = { gymnastics: '體操 Gymnastics', clarinet: '豎笛 Clarinet', guitar: '吉他 Guitar', piano: '鋼琴 Piano', snowboard: '滑單板 Snowboard', paragliding: '滑翔傘 Paragliding' };
+  const talentYears = { gymnastics: '2022', clarinet: '2023', guitar: '2023', piano: '2021', snowboard: '2024', paragliding: '2026' };
   const talentsData = [];
   Object.keys(talentCounts).forEach((key) => {
     for (let i = 1; i <= talentCounts[key]; i++) {
