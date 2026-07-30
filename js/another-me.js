@@ -69,11 +69,15 @@
     );
   }
 
-  /* ---------------- Section：Bouldering（簡單橫向卡片網格） ---------------- */
+  /* ---------------- Section：Bouldering（扇形展開，左右對稱） ---------------- */
   function initBouldering() {
     const container = document.getElementById('boulderingGrid');
     if (!container) return;
-    boulderingData.forEach((item) => {
+    const total = boulderingData.length;
+    const radius = 300;
+    const angleSpan = 130; // 扇形总张角，中间那张朝正上方，左右各展开 65 度
+
+    boulderingData.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'bouldering-card';
       const img = document.createElement('img');
@@ -83,6 +87,28 @@
       attachImageFallback(img, item.label);
       card.appendChild(img);
       container.appendChild(card);
+
+      // 扇子的支点在卡片下方 radius 处；角度对称分布（-65°~+65°），
+      // x/rotation 是角度的奇函数（左右镜像），y 是偶函数（两侧一样往下垂），
+      // 这样排出来才是真的左右对称的扇形，不会歪成一边高一边低的「C」
+      const t = total === 1 ? 0.5 : index / (total - 1);
+      const angle = -angleSpan / 2 + angleSpan * t;
+      const rad = (angle * Math.PI) / 180;
+      const x = radius * Math.sin(rad);
+      const y = radius * (1 - Math.cos(rad));
+
+      if (window.gsap) {
+        gsap.set(card, { x, y, rotation: angle, transformOrigin: '50% 220px' });
+      } else {
+        card.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg)`;
+      }
+
+      card.addEventListener('mouseenter', () => {
+        if (window.gsap) gsap.to(card, { duration: 0.3, scale: 1.08, zIndex: 10, ease: 'power2.out' });
+      });
+      card.addEventListener('mouseleave', () => {
+        if (window.gsap) gsap.to(card, { duration: 0.3, scale: 1, zIndex: 1, ease: 'power2.out' });
+      });
     });
   }
 
@@ -178,6 +204,54 @@
     });
   }
 
+  /* ---------------- 捲動進場動畫：每個分頁自己的標題／說明淡入上移，
+     卡片群組用 stagger 一張一張陸續出現，滾動到哪裡就補上動畫，
+     不是整頁一次全部靜態擺好 ---------------- */
+  function initScrollReveals() {
+    if (!window.gsap || !window.ScrollTrigger) return;
+    gsap.registerPlugin(ScrollTrigger);
+    const scroller = modal.querySelector('.modal-scroll');
+
+    gsap.utils.toArray('.am-reveal').forEach((el) => {
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: el, scroller, start: 'top 88%' },
+        },
+      );
+    });
+
+    [
+      ['.world-me-card', '#worldMeGrid'],
+      ['.hobby-card', '#hobbyGrid'],
+      ['.bouldering-card', '#boulderingGrid'],
+    ].forEach(([cardSelector, containerSelector]) => {
+      const container = document.querySelector(containerSelector);
+      if (!container) return;
+      const cards = container.querySelectorAll(cardSelector);
+      if (!cards.length) return;
+      gsap.fromTo(
+        cards,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: 'power2.out',
+          stagger: 0.06,
+          scrollTrigger: { trigger: container, scroller, start: 'top 88%' },
+        },
+      );
+    });
+
+    ScrollTrigger.refresh();
+  }
+
   /* ---------------- Modal 開關 ---------------- */
   let initialized = false;
   function openModal() {
@@ -185,11 +259,16 @@
       initWorldMe();
       initHobby();
       initBouldering();
+      initScrollReveals();
       initialized = true;
     }
     modal.classList.remove('hidden');
     modal.classList.add('is-open');
     document.body.style.overflow = 'hidden';
+    // Modal 打开时暂停主页面的 3D 背景、启动 halftone 装饰场景，
+    // 避免两个 WebGL 场景同时跑
+    if (window.__bg3dPause) window.__bg3dPause();
+    if (window.__haltoneSetModalOpen) window.__haltoneSetModalOpen(true);
     if (window.gsap) {
       gsap.to(modal, { duration: 0.4, opacity: 1, visibility: 'visible', ease: 'power2.inOut' });
     } else {
@@ -203,6 +282,8 @@
       modal.classList.remove('is-open');
       document.body.style.overflow = '';
     };
+    if (window.__bg3dResume) window.__bg3dResume();
+    if (window.__haltoneSetModalOpen) window.__haltoneSetModalOpen(false);
     if (window.gsap) {
       gsap.to(modal, { duration: 0.4, opacity: 0, visibility: 'hidden', ease: 'power2.inOut', onComplete: finish });
     } else {

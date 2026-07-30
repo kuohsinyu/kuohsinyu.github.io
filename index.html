@@ -16,11 +16,13 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
   }
 }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 </head>
 <body>
 
@@ -266,10 +268,18 @@
           <img src="assets/img/another-me/hero-bg.jpg" alt="">
           <div class="modal-hero-overlay"></div>
         </div>
-        <div class="intro-copy">
+        <div class="intro-copy am-reveal">
           <h1 id="anotherMeTitle">另一個我</h1>
           <p class="intro-en">Another Me</p>
           <p class="intro-subtitle" data-i18n="am-intro-subtitle">展現我的興趣、熱情、和旅程</p>
+        </div>
+      </section>
+
+      <section class="modal-section halftone-section">
+        <div class="halftone-canvas" id="halftoneCanvas" aria-hidden="true"></div>
+        <div class="halftone-copy am-reveal">
+          <span class="world-me-tag" data-i18n="am-halftone-tag">A LITTLE EXPERIMENT</span>
+          <h2 data-i18n="am-halftone-title">跳出履歷之外的我</h2>
         </div>
       </section>
 
@@ -280,7 +290,7 @@
             <path d="M-50,650 C 250,500 400,800 600,650 S 950,500 1050,700" />
           </svg>
         </div>
-        <div class="world-me-intro">
+        <div class="world-me-intro am-reveal">
           <span class="world-me-tag" data-i18n="am-world-tag">THE WORLD &amp; ME</span>
           <h2 data-i18n="am-world-title">我眼中的世界，與世界之間的我</h2>
           <p class="world-me-quote" data-i18n="am-world-quote">走過的每個地方，都留下了一點點不一樣的自己。</p>
@@ -289,13 +299,16 @@
       </section>
 
       <section class="modal-section hobby-section">
-        <h2 data-i18n="am-hobby-title">Hobby</h2>
-        <div class="hobby-grid" id="hobbyGrid"></div>
+        <h2 class="am-reveal" data-i18n="am-hobby-title">Hobby</h2>
+        <p class="hobby-hint am-reveal" data-i18n="am-hobby-hint">向右滑動看更多 →</p>
+        <div class="hobby-scroll" id="hobbyScroll">
+          <div class="hobby-track" id="hobbyGrid"></div>
+        </div>
       </section>
 
       <section class="modal-section bouldering-section">
-        <h2 data-i18n="am-bouldering-title">抱石 Bouldering</h2>
-        <div class="bouldering-grid" id="boulderingGrid"></div>
+        <h2 class="am-reveal" data-i18n="am-bouldering-title">抱石 Bouldering</h2>
+        <div class="bouldering-fan" id="boulderingGrid"></div>
       </section>
 
     </div>
@@ -304,6 +317,7 @@
 
 <script src="js/script.js" defer></script>
 <script src="js/another-me.js" defer></script>
+<script type="module" src="js/another-me-halftone.js"></script>
 <script type="module" src="js/bg3d.js"></script>
 </body>
 </html>

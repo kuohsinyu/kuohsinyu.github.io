@@ -846,10 +846,19 @@ void main() {
   });
 
   /* ---------------- 主循环 ---------------- */
+  // 「另一個我」Modal 打开时会盖满全屏、自己再跑一个独立的 Three.js 场景
+  // （halftone 装饰用），两个 WebGL 场景同时跑很吃效能。这里暴露一个全局
+  // 暂停开关，Modal 打开时跳过这个背景的渲染（rAF 循环本身继续跑，只是
+  // 不真的画东西，恢复时不需要重新初始化），关闭时再恢复。
+  window.__bg3dPause = () => { paused = true; };
+  window.__bg3dResume = () => { paused = false; clock.getDelta(); };
+  let paused = false;
+
   const clock = new THREE.Clock();
   function animate() {
     requestAnimationFrame(animate);
     const dt = clock.getDelta();
+    if (paused) return;
 
     if (!dragging) theta += CONFIG.autoDriftSpeed * dt;
     updateCameraPosition();
