@@ -9,7 +9,10 @@
   --accent:    #ffffff;
 
   --font-mono: 'JetBrains Mono', monospace;
-  --font-display: 'Inter', 'Franklin Gothic Medium', 'Arial Narrow', sans-serif;
+  /* Fraunces 负责拉丁字母（可变字重/opsz，撑起标题的个性），中文字元自动
+     接到 Iansui（教育部标准楷书改编）——同一个 font-family 堆叠，切换
+     中英文不需要另外写语系判断的 CSS */
+  --font-display: 'Fraunces', 'Iansui', serif;
 }
 
 *{ box-sizing: border-box; }
