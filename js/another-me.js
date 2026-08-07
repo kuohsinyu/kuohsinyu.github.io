@@ -14,6 +14,12 @@
   const closeBtn = modal ? modal.querySelector('.modal-close') : null;
   if (!modal || !openBtn) return;
 
+  // 觸控裝置沒有真正的滑鼠游標，一碰卡片瀏覽器只會模擬觸發 mouseenter，
+  // 之後不會再有 mouseleave 讓卡片「離開 hover」——縮放/位移這些純裝飾性
+  // 的 hover 效果就會卡在放大/位移過的狀態出不來，變成「怪怪的」。
+  // 跟 script.js 用同一個判斷方式，觸控裝置乾脆完全不掛這些 hover 動畫
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+
   /* ---------------- 資料 ---------------- */
   const boulderingData = Array.from({ length: 6 }, (_, i) => {
     const n = String(i + 1).padStart(2, '0');
@@ -132,12 +138,14 @@
         card.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg)`;
       }
 
-      card.addEventListener('mouseenter', () => {
-        if (window.gsap) gsap.to(card, { duration: 0.3, scale: 1.08, zIndex: 10, ease: 'power2.out' });
-      });
-      card.addEventListener('mouseleave', () => {
-        if (window.gsap) gsap.to(card, { duration: 0.3, scale: 1, zIndex: 1, ease: 'power2.out' });
-      });
+      if (!isCoarsePointer) {
+        card.addEventListener('mouseenter', () => {
+          if (window.gsap) gsap.to(card, { duration: 0.3, scale: 1.08, zIndex: 10, ease: 'power2.out' });
+        });
+        card.addEventListener('mouseleave', () => {
+          if (window.gsap) gsap.to(card, { duration: 0.3, scale: 1, zIndex: 1, ease: 'power2.out' });
+        });
+      }
     });
   }
 
@@ -220,12 +228,14 @@
       card.appendChild(label);
       grid.appendChild(card);
 
-      card.addEventListener('mouseenter', () => {
-        if (window.gsap) gsap.to(card, { duration: 0.3, y: -8, ease: 'power2.out' });
-      });
-      card.addEventListener('mouseleave', () => {
-        if (window.gsap) gsap.to(card, { duration: 0.3, y: 0, ease: 'power2.out' });
-      });
+      if (!isCoarsePointer) {
+        card.addEventListener('mouseenter', () => {
+          if (window.gsap) gsap.to(card, { duration: 0.3, y: -8, ease: 'power2.out' });
+        });
+        card.addEventListener('mouseleave', () => {
+          if (window.gsap) gsap.to(card, { duration: 0.3, y: 0, ease: 'power2.out' });
+        });
+      }
     });
   }
 
@@ -245,18 +255,25 @@
     if (!section || !viewport || !track) return;
 
     gsap.set(track, { x: 0 });
+    const getTravel = () => Math.max(1, track.scrollWidth - viewport.clientWidth);
 
-    ScrollTrigger.create({
-      trigger: section,
-      scroller,
-      start: 'top top',
-      end: () => '+=' + Math.max(1, track.scrollWidth - viewport.clientWidth),
-      scrub: true,
-      pin: true,
-      anticipatePin: 1,
-      onUpdate(self) {
-        const travel = track.scrollWidth - viewport.clientWidth;
-        gsap.set(track, { x: -travel * self.progress });
+    // 原本是單獨的 ScrollTrigger.create() 配 onUpdate 手動 gsap.set()，
+    // 沒有掛在真正的 tween 上——scrub 只對「正在被 scrub 的 tween」有
+    // 平滑效果，這裡等於完全沒有 tween 可以 scrub，滾動多少畫面就瞬間
+    // 跳多少，手機觸控慣性捲動一次跳一大段位移，看起來特別頓。改成用
+    // gsap.to() 建立一個真正的 tween，讓 scrub 這個數字（秒數）在滾動
+    // 位置跟畫面位移之間加一層平滑的追趕動畫，而不是滾多少立刻對應多少
+    gsap.to(track, {
+      x: () => -getTravel(),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        scroller,
+        start: 'top top',
+        end: () => '+=' + getTravel(),
+        scrub: 0.6,
+        pin: true,
+        anticipatePin: 1,
       },
     });
   }

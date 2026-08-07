@@ -487,6 +487,10 @@
   box-shadow: 0 10px 24px rgba(26, 42, 0, .2);
   cursor: pointer;
   background: rgba(255, 255, 255, .35);
+  /* GSAP 的 hover 縮放已經在觸控裝置上完全不掛了，這裡另外補一層 CSS
+     transition 當保險——就算之後有任何地方留下未歸位的 inline scale，
+     也會自己緩慢地補回 1 倍，不會維持在放大的狀態卡住不動 */
+  transition: transform .3s ease;
 }
 
 .bouldering-card img{
