@@ -167,6 +167,34 @@ body::before{
   background: rgba(255, 255, 255, .08);
 }
 
+/* 漢堡選單按鈕——只在手機斷點出現，桌機版完全不顯示、不佔版面 */
+.nav-menu-toggle{
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  z-index: 210;
+}
+
+.nav-menu-toggle span{
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 2px;
+  transition: transform .3s ease, opacity .3s ease;
+}
+
+/* 打開時三條線變成一個 X */
+.nav-menu-toggle.is-open span:nth-child(1){ transform: translateY(7px) rotate(45deg); }
+.nav-menu-toggle.is-open span:nth-child(2){ opacity: 0; }
+.nav-menu-toggle.is-open span:nth-child(3){ transform: translateY(-7px) rotate(-45deg); }
+
 /* ============================================================
    主视觉标题（HERO）
 ============================================================ */
@@ -717,22 +745,45 @@ body::before{
    响应式设计
 ============================================================ */
 @media (max-width: 768px){
+  /* 手機版導覽列：logo 留在原本那條列，其餘連結收進漢堡選單，
+     這條列本身高度維持跟桌機差不多矮，才不會一開頁就把 hero
+     文字往下推或直接蓋住 */
   .nav{
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 24px 24px;
+    padding: 20px 24px;
   }
 
   .nav-logo{ font-size: .85rem; }
 
+  .nav-menu-toggle{ display: flex; }
+
+  /* 選單展開時是蓋滿整個畫面的全螢幕面板，預設完全藏在畫面外
+     （往上位移＋透明），不佔用任何版面空間、也不會擋住底下內容 */
   .nav-links{
+    position: fixed;
+    inset: 0;
+    z-index: 200;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    background: rgba(10, 10, 12, .97);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-12px);
+    transition: opacity .3s ease, transform .3s ease, visibility 0s linear .3s;
   }
 
-  .nav-links a{ font-size: .85rem; }
+  .nav-links.is-open{
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity .3s ease, transform .3s ease, visibility 0s linear 0s;
+  }
+
+  .nav-links a,
+  .nav-links .nav-another-me{
+    font-size: 1.3rem;
+  }
 
   .hero{
     padding: 180px 24px 100px;

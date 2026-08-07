@@ -228,6 +228,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ---------------- 手機版漢堡選單 ---------------- */
+  const navMenuToggle = document.getElementById('navMenuToggle');
+  const navLinks = document.getElementById('navLinks');
+
+  if (navMenuToggle && navLinks) {
+    function closeNavMenu() {
+      navMenuToggle.classList.remove('is-open');
+      navLinks.classList.remove('is-open');
+      navMenuToggle.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    function openNavMenu() {
+      navMenuToggle.classList.add('is-open');
+      navLinks.classList.add('is-open');
+      navMenuToggle.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+
+    navMenuToggle.addEventListener('click', () => {
+      if (navLinks.classList.contains('is-open')) closeNavMenu();
+      else openNavMenu();
+    });
+
+    // 點選單裡的連結之後要自動收起來，不然點完連結畫面捲過去了，
+    // 選單還蓋在上面；「MORE OF ME」會另外開一個全螢幕 Modal，
+    // 同樣要先把選單收起來，不然變成兩層全螢幕疊在一起
+    const anotherMeBtn = document.getElementById('anotherMeBtn');
+    navLinks.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', closeNavMenu);
+    });
+    if (anotherMeBtn) anotherMeBtn.addEventListener('click', closeNavMenu);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && navLinks.classList.contains('is-open')) closeNavMenu();
+    });
+  }
+
   /* ---------------- 語言切換 ---------------- */
   const langToggle = document.getElementById('langToggle');
 
