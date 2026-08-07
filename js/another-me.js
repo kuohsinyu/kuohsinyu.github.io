@@ -104,6 +104,12 @@
     );
   }
 
+  // Bouldering 的扇形攤開、Hobby 的橫向 pin+scrub 都需要不小的橫向
+  // 空間，手機螢幕放不下，卡片會被擠出畫面外或看起來一直在跳動。
+  // 跟 another-me.css 的 900px 斷點對齊，手機版這兩個 section 都改用
+  // CSS 排出來的單純直式清單，這裡只要不建立/不套用橫向的位移就好
+  const isMobileLayout = window.matchMedia('(max-width: 900px)').matches;
+
   /* ---------------- Section：Bouldering（扇形展開，左右對稱） ---------------- */
   function initBouldering() {
     const container = document.getElementById('boulderingGrid');
@@ -123,19 +129,21 @@
       card.appendChild(img);
       container.appendChild(card);
 
-      // 扇子的支点在卡片下方 radius 处；角度对称分布（-65°~+65°），
-      // x/rotation 是角度的奇函数（左右镜像），y 是偶函数（两侧一样往下垂），
-      // 这样排出来才是真的左右对称的扇形，不会歪成一边高一边低的「C」
-      const t = total === 1 ? 0.5 : index / (total - 1);
-      const angle = -angleSpan / 2 + angleSpan * t;
-      const rad = (angle * Math.PI) / 180;
-      const x = radius * Math.sin(rad);
-      const y = radius * (1 - Math.cos(rad));
+      if (!isMobileLayout) {
+        // 扇子的支点在卡片下方 radius 处；角度对称分布（-65°~+65°），
+        // x/rotation 是角度的奇函数（左右镜像），y 是偶函数（两侧一样往下垂），
+        // 这样排出来才是真的左右对称的扇形，不会歪成一边高一边低的「C」
+        const t = total === 1 ? 0.5 : index / (total - 1);
+        const angle = -angleSpan / 2 + angleSpan * t;
+        const rad = (angle * Math.PI) / 180;
+        const x = radius * Math.sin(rad);
+        const y = radius * (1 - Math.cos(rad));
 
-      if (window.gsap) {
-        gsap.set(card, { x, y, rotation: angle, transformOrigin: '50% 264px' });
-      } else {
-        card.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg)`;
+        if (window.gsap) {
+          gsap.set(card, { x, y, rotation: angle, transformOrigin: '50% 264px' });
+        } else {
+          card.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg)`;
+        }
       }
 
       if (!isCoarsePointer) {
@@ -246,6 +254,11 @@
      左右展示排開，不是自己跑掉的自動捲動——完全跟著滾動方向走，
      不再有「鼠標一動就飆走」的跟隨鼠標邏輯，也沒有閒置自動漂移 ---------------- */
   function initHobbyScrollGate() {
+    // 手機上這個橫向 pin+scrub 效果就算加了平滑也還是會覺得照片在跳動
+    // ——用一路往下滑的直式清單取代，完全不做橫向位移，體感才穩。
+    // 手機版的直式排版交給 CSS（見 another-me.css 的 900px 斷點），
+    // 這裡只要不建立 ScrollTrigger、也不把 track 設成橫向位移就好
+    if (isMobileLayout) return;
     if (!window.gsap || !window.ScrollTrigger) return;
     gsap.registerPlugin(ScrollTrigger);
     const scroller = modal.querySelector('.modal-scroll');

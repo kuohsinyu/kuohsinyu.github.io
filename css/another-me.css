@@ -560,9 +560,59 @@
   .intro-copy{ padding: 0 24px; }
   .intro-copy h1{ font-size: 3rem; }
   .world-me-grid{ grid-template-columns: repeat(2, 1fr); }
-  .hobby-scroll{ margin-left: -24px; }
-  .hobby-track{ padding: 0 24px; }
+
+  /* Hobby 原本是「pin 住畫面、橫向捲動看照片」，手機上橫向位移感覺
+     像照片在跳動，不好看——改成單純由上往下堆的直式清單，不做任何
+     橫向位移（JS 那邊 initHobbyScrollGate() 在這個寬度也不會啟動） */
+  .hobby-scroll{
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    margin-left: 0;
+  }
+  .hobby-track{
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    padding: 0;
+  }
+  .hobby-card{
+    width: 100%;
+    max-width: 380px;
+  }
+  /* 桌機版用 margin-bottom 錯落製造隨手感，直式清單只要單純用
+     .hobby-track 的 gap 平均分隔就好，這裡全部歸零 */
+  .hobby-card:nth-child(4n+1),
+  .hobby-card:nth-child(4n+2),
+  .hobby-card:nth-child(4n+3),
+  .hobby-card:nth-child(4n){
+    margin-bottom: 0;
+    width: 100%;
+    max-width: 380px;
+  }
+
   /* 窄螢幕上固定高度塞不下扇形＋標題，改回自動高度 */
   .bouldering-section{ height: auto; max-height: none; padding: 100px 24px; }
-  .bouldering-fan{ height: 420px; }
+
+  /* Bouldering 扇形攤開需要左右各 ±420px 的空間，手機根本放不下，
+     卡片會被擠出畫面外看起來在亂跳——改成單純由上往下堆的直式清單
+     （JS 那邊 initBouldering() 在這個寬度不會套用扇形的 x/y/rotation） */
+  .bouldering-fan{
+    position: static;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    margin: 32px auto 0;
+  }
+  .bouldering-card{
+    position: static;
+    width: 220px;
+    height: 293px;
+    margin: 0;
+  }
 }

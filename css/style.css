@@ -745,6 +745,32 @@ body::before{
    响应式设计
 ============================================================ */
 @media (max-width: 768px){
+  /* 手機看不到桌機那支 Three.js 3D 背景（下面 #bg3d{display:none}），
+     只留一片近黑色平面看起来太单调。改用跟「更多的我」Modal 同一個
+     色相（跟 --am-ccff00 同一條 72° 色相環）、但刻意壓在偏深的區間
+     ——這個亮度區間才能讓全站原本就有的白色文字／半透明白色邊框
+     繼續維持足夠對比，不用整頁重新配色。五個主要區塊各自的深淺
+     沿同一色相漸進，捲下去有層次但風格統一 */
+  :root{
+    --m-hero:  #3E5200;
+    --m-about: #475900;
+    --m-exp:   #4E6300;
+    --m-proj:  #546A00;
+    --m-contact: #5C7400;
+  }
+
+  html{ background: var(--m-hero); }
+
+  /* 呼吸燈光暈原本是設計來搭配 3D 背景的裝飾，手機上 3D 背景已經藏起來，
+     現在每個區塊都改成實色底，光暈整個會被蓋住看不見，乾脆直接關掉 */
+  body::before{ display: none; }
+
+  .hero{ background: var(--m-hero); }
+  #about{ background: var(--m-about); }
+  #experience{ background: var(--m-exp); }
+  #projects{ background: var(--m-proj); }
+  #contact{ background: var(--m-contact); }
+
   /* 手機版導覽列：logo 留在原本那條列，其餘連結收進漢堡選單，
      這條列本身高度維持跟桌機差不多矮，才不會一開頁就把 hero
      文字往下推或直接蓋住 */
@@ -766,7 +792,7 @@ body::before{
     align-items: center;
     justify-content: center;
     gap: 28px;
-    background: rgba(10, 10, 12, .97);
+    background: var(--m-hero);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-12px);
@@ -801,7 +827,14 @@ body::before{
   .section-title{ font-size: 2.2rem; }
 
   .about-layout{ justify-content: center; text-align: center; }
-  .about-photos{ margin: 0 auto; }
+  /* 兩張照片原本各自寫死 260px 寬，兩張加間距共 540px，比大多數手機
+     螢幕還寬，會撐出橫向捲動、連帶把 fixed 的 .nav 也擠寬，導致漢堡
+     選單按鈕被推到畫面外點不到。只縮小單張照片沒有用——.about-photos
+     本身還是 flex:0 0 auto（桌機版設定），照樣會撐到兩張照片合計的
+     寬度，不會真的觸發 wrap。這裡額外把 .about-photos 自己也夾到
+     容器可用寬度以內，裡面的兩張照片才會因為真的放不下而摺成上下兩張 */
+  .about-photos{ width: 100%; flex: 1 1 100%; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
+  .about-photo{ width: min(260px, 60vw); height: auto; aspect-ratio: 260 / 355; }
   /* section 的左侧 padding 在这个断点变成 24px，破版宽度也要跟着改 */
   .about-video-wrap{ margin-left: -24px; }
 
